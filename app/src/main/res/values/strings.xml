@@ -5,4 +5,8 @@
     <string name="ranklabel">"Rank : "</string>
     <string name="countrylabel">"Country : "</string>
     <string name="populationlabel">"Population : "</string>
+
+    <string name="question_views_label">"Views : "</string>
+    <string name="question_difficulty_label">"Difficulty : "</string>
+    <string name="question_likes_label">"Likes : "</string>
 </resources>

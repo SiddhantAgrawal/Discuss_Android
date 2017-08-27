@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/answer_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25dp"
+        android:layout_alignParentLeft="true"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/answer_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/answer_text"
+        android:background="#000000"
+        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
+        android:padding="1dp" />
+
+    <ToggleButton
+        android:id="@+id/answer_likeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/answer_image"
+        android:maxHeight="5dp"
+        android:maxWidth="5dp"
+        android:textOff="Like"
+        android:textOn="Liked" />
+
+    <TextView
+        android:id="@+id/answer_likes_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25dp"
+        android:layout_toRightOf="@+id/answer_likeButton"
+        android:layout_below="@id/answer_image"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

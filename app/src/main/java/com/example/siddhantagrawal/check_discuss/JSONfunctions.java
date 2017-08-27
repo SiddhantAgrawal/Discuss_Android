@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import org.apache.http.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -25,11 +26,12 @@ public class JSONfunctions {
         String result = "";
         JSONObject jArray = null;
 
-        // Download JSON data from URL
+        // Download JSON answers_data from URL
         try {
             HttpClient httpclient = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(url);
             HttpPost httppost = new HttpPost(url);
-            HttpResponse response = httpclient.execute(httppost);
+            HttpResponse response = httpclient.execute(httpGet);
             HttpEntity entity = response.getEntity();
             is = entity.getContent();
 
@@ -56,9 +58,13 @@ public class JSONfunctions {
 
             jArray = new JSONObject(result);
         } catch (JSONException e) {
-            Log.e("log_tag", "Error parsing data " + e.toString());
+            Log.e("log_tag", "Error parsing answers_data " + e.toString());
         }
 
         return jArray;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getJSONfromURL("http://supply-engg1002.common.blr1.inmobi.com:8082/data/").toString());
     }
 }

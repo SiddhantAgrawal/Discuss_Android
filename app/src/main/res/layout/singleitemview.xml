@@ -5,51 +5,81 @@
     android:layout_height="fill_parent" >
 
     <TextView
-        android:id="@+id/ranklabel"
+        android:id="@+id/siv_question_views_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ranklabel" />
+        android:textSize="25dp"
+        android:text="@string/question_views_label" />
 
     <TextView
-        android:id="@+id/rank"
+        android:id="@+id/siv_question_views"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/ranklabel" />
+        android:textSize="25dp"
+        android:layout_toRightOf="@+id/siv_question_views_label" />
 
     <TextView
-        android:id="@+id/countrylabel"
+        android:id="@+id/siv_question_difficulty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/ranklabel"
-        android:text="@string/countrylabel" />
+        android:textSize="25dp"
+        android:layout_alignParentRight="true" />
 
     <TextView
-        android:id="@+id/country"
+        android:id="@+id/siv_question_difficulty_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rank"
-        android:layout_toRightOf="@+id/countrylabel" />
+        android:text="@string/question_difficulty_label"
+        android:layout_alignParentTop="true"
+        android:textSize="25dp"
+        android:layout_toStartOf="@+id/siv_question_difficulty"
+        android:layout_toLeftOf="@+id/siv_question_difficulty" />
 
     <TextView
-        android:id="@+id/populationlabel"
+        android:id="@+id/siv_question_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/countrylabel"
-        android:text="@string/populationlabel" />
-
-    <TextView
-        android:id="@+id/population"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/country"
-        android:layout_toRightOf="@+id/populationlabel" />
+        android:textSize="25dp"
+        android:layout_below="@id/siv_question_views_label"
+        android:textStyle="bold" />
 
     <ImageView
-        android:id="@+id/flag"
+        android:id="@+id/siv_question_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_below="@id/siv_question_text"
         android:background="#000000"
+        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
         android:padding="1dp" />
+
+    <TextView
+        android:id="@+id/siv_all_answers_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/siv_question_image"
+        android:textSize="23dp"
+        android:text="ALL ANSWERS HERE" />
+
+    <Button
+        android:id="@+id/answer_allButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:maxHeight="5dp"
+        android:maxWidth="5dp"
+        android:text="VIEW ALL ANSWERS " />
+
+    <ListView
+        android:id="@+id/answers_listview"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/siv_all_answers_label"
+        android:layout_above="@id/answer_allButton"/>
+
+
 
 </RelativeLayout>

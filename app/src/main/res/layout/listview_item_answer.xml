@@ -1,76 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/question_views_label"
+        android:id="@+id/all_answer_views_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="25dp"
         android:text="@string/question_views_label" />
 
     <TextView
-        android:id="@+id/question_views"
+        android:id="@+id/all_answer_views"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="25dp"
-        android:layout_toRightOf="@+id/question_views_label" />
+        android:layout_toRightOf="@+id/all_answer_views_label" />
 
     <TextView
-        android:id="@+id/question_difficulty"
+        android:id="@+id/all_answer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="25dp"
-        android:layout_alignParentRight="true" />
-
-    <TextView
-        android:id="@+id/question_difficulty_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/question_difficulty_label"
-        android:layout_alignParentTop="true"
-        android:textSize="25dp"
-        android:layout_toStartOf="@+id/question_difficulty"
-        android:layout_toLeftOf="@+id/question_difficulty" />
-
-    <TextView
-        android:id="@+id/question_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:layout_below="@id/question_views_label"
+        android:layout_below="@id/all_answer_views_label"
         android:textStyle="bold" />
 
     <ImageView
-        android:id="@+id/question_image"
+        android:id="@+id/all_answer_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/question_text"
+        android:layout_below="@id/all_answer_text"
         android:background="#000000"
         android:layout_centerVertical="true"
         android:layout_centerInParent="true"
         android:padding="1dp" />
 
     <ToggleButton
-        android:id="@+id/question_likeButton"
+        android:id="@+id/all_answer_likeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/question_image"
+        android:layout_below="@+id/all_answer_image"
         android:maxHeight="5dp"
         android:maxWidth="5dp"
         android:textOff="Like"
         android:textOn="Liked" />
 
     <TextView
-        android:id="@+id/question_likes_button"
+        android:id="@+id/all_answer_likes_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="25dp"
-        android:layout_toRightOf="@+id/question_likeButton"
-        android:layout_below="@id/question_image"
+        android:layout_toRightOf="@+id/all_answer_likeButton"
+        android:layout_below="@id/all_answer_image"
         android:layout_alignParentBottom="true"/>
-
 
 </RelativeLayout>

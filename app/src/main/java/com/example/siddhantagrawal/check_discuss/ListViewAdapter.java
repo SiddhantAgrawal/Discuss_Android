@@ -22,20 +22,20 @@ public class ListViewAdapter extends BaseAdapter {
     // Declare Variables
     Context context;
     LayoutInflater inflater;
-    ArrayList<HashMap<String, String>> data;
+    ArrayList<HashMap<String, String>> questions_data;
     ImageLoader imageLoader;
-    HashMap<String, String> resultp = new HashMap<String, String>();
+    HashMap<String, String> specific_question = new HashMap<String, String>();
 
     public ListViewAdapter(Context context,
                            ArrayList<HashMap<String, String>> arraylist) {
         this.context = context;
-        data = arraylist;
+        questions_data = arraylist;
         imageLoader = new ImageLoader(context);
     }
 
     @Override
     public int getCount() {
-        return data.size();
+        return questions_data.size();
     }
 
     @Override
@@ -50,49 +50,64 @@ public class ListViewAdapter extends BaseAdapter {
 
     public View getView(final int position, View convertView, ViewGroup parent) {
         // Declare Variables
-        TextView rank;
-        TextView country;
-        TextView population;
-        ImageView flag;
+        TextView question_views;
+        TextView question_difficulty;
+        TextView question_text;
+        ImageView question_image;
+        TextView question_likes_button;
 
         inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View itemView = inflater.inflate(R.layout.listview_item, parent, false);
         // Get the position
-        resultp = data.get(position);
+        specific_question = questions_data.get(position);
 
         // Locate the TextViews in listview_item.xml
-        rank = (TextView) itemView.findViewById(R.id.rank);
-        country = (TextView) itemView.findViewById(R.id.country);
-        population = (TextView) itemView.findViewById(R.id.population);
+        question_views = (TextView) itemView.findViewById(R.id.question_views);
+        question_difficulty = (TextView) itemView.findViewById(R.id.question_difficulty);
+        question_text = (TextView) itemView.findViewById(R.id.question_text);
+        question_likes_button = (TextView) itemView.findViewById(R.id.question_likes_button);
+
 
         // Locate the ImageView in listview_item.xml
-        flag = (ImageView) itemView.findViewById(R.id.flag);
+        question_image = (ImageView) itemView.findViewById(R.id.question_image);
+
 
         // Capture position and set results to the TextViews
-        rank.setText(resultp.get(MainActivity.RANK));
-        country.setText(resultp.get(MainActivity.COUNTRY));
-        population.setText(resultp.get(MainActivity.POPULATION));
+        question_views.setText(specific_question.get(MainActivity.VIEWS));
+        question_difficulty.setText(specific_question.get(MainActivity.DIFFICULTY));
+        if (null != specific_question.get(MainActivity.TEXT))
+            question_text.setText(specific_question.get(MainActivity.TEXT));
+        question_likes_button.setText(specific_question.get(MainActivity.LIKES));
+
+
         // Capture position and set results to the ImageView
         // Passes flag images URL into ImageLoader.class
-        imageLoader.DisplayImage(resultp.get(MainActivity.FLAG), flag);
+
+        if (null != specific_question.get(MainActivity.IMAGE))
+            imageLoader.DisplayImage(specific_question.get(MainActivity.IMAGE), question_image);
         // Capture ListView item click
         itemView.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
                 // Get the position
-                resultp = data.get(position);
+                specific_question = questions_data.get(position);
                 Intent intent = new Intent(context, SingleItemView.class);
-                // Pass all data rank
-                intent.putExtra("rank", resultp.get(MainActivity.RANK));
-                // Pass all data country
-                intent.putExtra("country", resultp.get(MainActivity.COUNTRY));
-                // Pass all data population
-                intent.putExtra("population",resultp.get(MainActivity.POPULATION));
-                // Pass all data flag
-                intent.putExtra("flag", resultp.get(MainActivity.FLAG));
+                // Pass all answers_data rank
+                intent.putExtra(MainActivity.VIEWS, specific_question.get(MainActivity.VIEWS));
+                // Pass all answers_data country
+                intent.putExtra(MainActivity.DIFFICULTY, specific_question.get(MainActivity.DIFFICULTY));
+                // Pass all answers_data population
+                if (null != specific_question.get(MainActivity.TEXT))
+                    intent.putExtra(MainActivity.TEXT, specific_question.get(MainActivity.TEXT));
+                // Pass all answers_data flag
+
+                if (null != specific_question.get(MainActivity.IMAGE))
+                    intent.putExtra(MainActivity.IMAGE, specific_question.get(MainActivity.IMAGE));
+
+                intent.putExtra(MainActivity.LIKES, specific_question.get(MainActivity.LIKES));
                 // Start SingleItemView Class
                 context.startActivity(intent);
 

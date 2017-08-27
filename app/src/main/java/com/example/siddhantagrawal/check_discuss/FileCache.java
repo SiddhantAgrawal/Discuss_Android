@@ -18,7 +18,7 @@ public class FileCache {
                 android.os.Environment.MEDIA_MOUNTED))
             cacheDir = new File(
                     android.os.Environment.getExternalStorageDirectory(),
-                    "JsonParseTutorialCache");
+                    "DiscussCache");
         else
             cacheDir = context.getCacheDir();
         if (!cacheDir.exists())
