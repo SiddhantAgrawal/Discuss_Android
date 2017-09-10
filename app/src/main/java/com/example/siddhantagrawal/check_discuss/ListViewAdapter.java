@@ -1,11 +1,7 @@
 package com.example.siddhantagrawal.check_discuss;
 
-/**
- * Created by siddhant.agrawal on 8/24/17.
- */
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,17 +13,22 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
+/**
+ *
+ * @author siddhant.agrawal, Deepak Thakur
+ *
+ */
 public class ListViewAdapter extends BaseAdapter {
 
     // Declare Variables
     Context context;
     LayoutInflater inflater;
-    ArrayList<HashMap<String, String>> data;
+    List<Population> data;
     ImageLoader imageLoader;
-    HashMap<String, String> resultp = new HashMap<String, String>();
 
     public ListViewAdapter(Context context,
-                           ArrayList<HashMap<String, String>> arraylist) {
+                           List<Population> arraylist) {
         this.context = context;
         data = arraylist;
         imageLoader = new ImageLoader(context);
@@ -60,7 +61,7 @@ public class ListViewAdapter extends BaseAdapter {
 
         View itemView = inflater.inflate(R.layout.listview_item, parent, false);
         // Get the position
-        resultp = data.get(position);
+        final Population resultp = data.get(position);
 
         // Locate the TextViews in listview_item.xml
         rank = (TextView) itemView.findViewById(R.id.rank);
@@ -71,28 +72,28 @@ public class ListViewAdapter extends BaseAdapter {
         flag = (ImageView) itemView.findViewById(R.id.flag);
 
         // Capture position and set results to the TextViews
-        rank.setText(resultp.get(MainActivity.RANK));
-        country.setText(resultp.get(MainActivity.COUNTRY));
-        population.setText(resultp.get(MainActivity.POPULATION));
+        rank.setText(resultp.rank);
+        country.setText(resultp.country);
+        population.setText(resultp.population);
         // Capture position and set results to the ImageView
         // Passes flag images URL into ImageLoader.class
-        imageLoader.DisplayImage(resultp.get(MainActivity.FLAG), flag);
+        imageLoader.DisplayImage(resultp.flag, flag);
         // Capture ListView item click
         itemView.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
                 // Get the position
-                resultp = data.get(position);
+                Population result = data.get(position);
                 Intent intent = new Intent(context, SingleItemView.class);
                 // Pass all data rank
-                intent.putExtra("rank", resultp.get(MainActivity.RANK));
+                intent.putExtra("rank", result.rank);
                 // Pass all data country
-                intent.putExtra("country", resultp.get(MainActivity.COUNTRY));
+                intent.putExtra("country", result.country);
                 // Pass all data population
-                intent.putExtra("population",resultp.get(MainActivity.POPULATION));
+                intent.putExtra("population", result.population);
                 // Pass all data flag
-                intent.putExtra("flag", resultp.get(MainActivity.FLAG));
+                intent.putExtra("flag", result.flag);
                 // Start SingleItemView Class
                 context.startActivity(intent);
 

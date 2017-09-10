@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.example.siddhantagrawal.discuss;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.siddhantagrawal.check_discuss", appContext.getPackageName());
+        assertEquals("com.discuss.app", appContext.getPackageName());
     }
 }
