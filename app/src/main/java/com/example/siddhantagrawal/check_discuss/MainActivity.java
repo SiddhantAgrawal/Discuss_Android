@@ -25,11 +25,12 @@ public class MainActivity extends Activity {
     ListView listview;
     ListViewAdapter adapter;
     ProgressDialog mProgressDialog;
-    List<Population> populations = new ArrayList<>();
+    List<Population.Data> populations = new ArrayList<>();
 
     final Subscriber<Population> populationSubscriber = new Subscriber<Population>() {
         @Override
         public void onCompleted() {
+            Log.e("list size", ""+populations.size());
             Log.e("MainActivity", "before Dismiss");
             listview = (ListView) findViewById(R.id.listview);
             // Pass the results into ListViewAdapter.java
@@ -51,8 +52,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onNext(Population population) {
-            Log.e("MainActivity", "added");
-            populations.add(population);
+            populations.addAll(population.worldpopulation);
         }
     };
 

@@ -24,11 +24,11 @@ public class ListViewAdapter extends BaseAdapter {
     // Declare Variables
     Context context;
     LayoutInflater inflater;
-    List<Population> data;
+    List<Population.Data> data;
     ImageLoader imageLoader;
 
     public ListViewAdapter(Context context,
-                           List<Population> arraylist) {
+                           List<Population.Data> arraylist) {
         this.context = context;
         data = arraylist;
         imageLoader = new ImageLoader(context);
@@ -61,7 +61,7 @@ public class ListViewAdapter extends BaseAdapter {
 
         View itemView = inflater.inflate(R.layout.listview_item, parent, false);
         // Get the position
-        final Population resultp = data.get(position);
+        final Population.Data resultp = data.get(position);
 
         // Locate the TextViews in listview_item.xml
         rank = (TextView) itemView.findViewById(R.id.rank);
@@ -84,7 +84,7 @@ public class ListViewAdapter extends BaseAdapter {
             @Override
             public void onClick(View arg0) {
                 // Get the position
-                Population result = data.get(position);
+                Population.Data result = data.get(position);
                 Intent intent = new Intent(context, SingleItemView.class);
                 // Pass all data rank
                 intent.putExtra("rank", result.rank);

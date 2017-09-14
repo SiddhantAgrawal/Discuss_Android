@@ -1,7 +1,7 @@
 package com.example.siddhantagrawal.check_discuss;
 
-import rx.Observable;
 
+import rx.Observable;
 
 /**
  * @author Deepak Thakur
