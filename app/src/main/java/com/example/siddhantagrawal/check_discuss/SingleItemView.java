@@ -1,56 +1,30 @@
 package com.example.siddhantagrawal.check_discuss;
 
-/**
- * Created by siddhant.agrawal on 8/24/17.
- */
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-
+/**
+ * @author Siddhant Agrawal
+ * @author Deepak Thakur
+ */
 public class SingleItemView extends Activity {
-    // Declare Variables
-    String rank;
-    String country;
-    String population;
-    String flag;
-    String position;
-    ImageLoader imageLoader = new ImageLoader(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Get the view from singleitemview.xml
-        setContentView(R.layout.singleitemview);
+        setContentView(R.layout.question_complete);
 
-        Intent i = getIntent();
-        // Get the result of rank
-        rank = i.getStringExtra("rank");
-        // Get the result of country
-        country = i.getStringExtra("country");
-        // Get the result of population
-        population = i.getStringExtra("population");
-        // Get the result of flag
-        flag = i.getStringExtra("flag");
+        Intent intent = getIntent();
 
-        // Locate the TextViews in singleitemview.xml
-        TextView txtrank = (TextView) findViewById(R.id.rank);
-        TextView txtcountry = (TextView) findViewById(R.id.country);
-        TextView txtpopulation = (TextView) findViewById(R.id.population);
+        TextView textViewForQuestion = (TextView) findViewById(R.id.question_complete_question);
+        TextView textViewForLikes = (TextView) findViewById(R.id.question_complete_like_value);
+        TextView textViewForPostedBy = (TextView) findViewById(R.id.question_complete_user_value);
 
-        // Locate the ImageView in singleitemview.xml
-        ImageView imgflag = (ImageView) findViewById(R.id.flag);
-
-        // Set results to the TextViews
-        txtrank.setText(rank);
-        txtcountry.setText(country);
-        txtpopulation.setText(population);
-
-        // Capture position and set results to the ImageView
-        // Passes flag images URL into ImageLoader.class
-        imageLoader.DisplayImage(flag, imgflag);
+        /* set results to the TextViews */
+        textViewForQuestion.setText(intent.getStringExtra("questionText"));
+        textViewForLikes.setText(Integer.toString(intent.getIntExtra("likes", 0)));
+        textViewForPostedBy.setText(intent.getStringExtra("postedBy"));
     }
 }

@@ -13,25 +13,25 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.discuss.datatypes.Question;
+
 
 /**
  *
- * @author siddhant.agrawal, Deepak Thakur
+ * @author siddhant.agrawal
+ * @author Deepak Thakur
  *
  */
-public class ListViewAdapter extends BaseAdapter {
+class ListViewAdapter extends BaseAdapter {
 
     // Declare Variables
-    Context context;
-    LayoutInflater inflater;
-    List<Population.Data> data;
-    ImageLoader imageLoader;
+    private Context context;
+    private List<Question> data;
 
-    public ListViewAdapter(Context context,
-                           List<Population.Data> arraylist) {
+    ListViewAdapter(Context context,
+                    List<Question> arraylist) {
         this.context = context;
         data = arraylist;
-        imageLoader = new ImageLoader(context);
     }
 
     @Override
@@ -50,51 +50,32 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     public View getView(final int position, View convertView, ViewGroup parent) {
-        // Declare Variables
-        TextView rank;
-        TextView country;
-        TextView population;
-        ImageView flag;
 
-        inflater = (LayoutInflater) context
+        LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View itemView = inflater.inflate(R.layout.listview_item, parent, false);
-        // Get the position
-        final Population.Data resultp = data.get(position);
+        View itemView = inflater.inflate(R.layout.question_short, parent, false); /* @todo See if this has performance issues */
+        final Question question = data.get(position);
 
-        // Locate the TextViews in listview_item.xml
-        rank = (TextView) itemView.findViewById(R.id.rank);
-        country = (TextView) itemView.findViewById(R.id.country);
-        population = (TextView) itemView.findViewById(R.id.population);
+        TextView questionText =  (TextView) itemView.findViewById(R.id.question_short_question);
+        TextView likes = (TextView) itemView.findViewById(R.id.question_short_like_value);
+        TextView postedBy = (TextView) itemView.findViewById(R.id.question_short_user_value);
 
-        // Locate the ImageView in listview_item.xml
-        flag = (ImageView) itemView.findViewById(R.id.flag);
+        questionText.setText(question.getText());
+        likes.setText(Integer.toString(question.getLikes()));
+        postedBy.setText(question.getUserName());
 
-        // Capture position and set results to the TextViews
-        rank.setText(resultp.rank);
-        country.setText(resultp.country);
-        population.setText(resultp.population);
-        // Capture position and set results to the ImageView
-        // Passes flag images URL into ImageLoader.class
-        imageLoader.DisplayImage(resultp.flag, flag);
-        // Capture ListView item click
         itemView.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                // Get the position
-                Population.Data result = data.get(position);
+                Question questionInfo = data.get(position);
                 Intent intent = new Intent(context, SingleItemView.class);
-                // Pass all data rank
-                intent.putExtra("rank", result.rank);
-                // Pass all data country
-                intent.putExtra("country", result.country);
-                // Pass all data population
-                intent.putExtra("population", result.population);
-                // Pass all data flag
-                intent.putExtra("flag", result.flag);
-                // Start SingleItemView Class
+
+                intent.putExtra("questionText", questionInfo.getText());
+                intent.putExtra("likes", questionInfo.getLikes());
+                intent.putExtra("postedBy", questionInfo.getUserName());
+
                 context.startActivity(intent);
 
             }

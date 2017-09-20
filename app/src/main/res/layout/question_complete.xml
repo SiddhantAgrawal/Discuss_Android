@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/question_complete_question"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"/>
+    <TextView
+        android:id="@+id/question_complete_like_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/like_label"
+        android:layout_marginBottom="24dp"
+        android:layout_alignParentBottom="true" />
+
+    <TextView
+        android:id="@+id/question_complete_like_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/question_complete_like_label"
+        android:layout_alignBaseline="@+id/question_complete_like_label"/>
+
+    <TextView
+        android:id="@+id/question_complete_user_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/user_label"
+        android:layout_marginBottom="24dp"
+        android:layout_alignBaseline="@+id/question_complete_like_label"
+        android:layout_toStartOf="@+id/question_complete_user_value"/>
+
+
+    <TextView
+        android:id="@+id/question_complete_user_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignBaseline="@+id/question_complete_like_label"/>
+</RelativeLayout>

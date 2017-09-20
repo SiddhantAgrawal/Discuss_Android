@@ -13,19 +13,22 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 
 
+import com.discuss.datatypes.Question;
+
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
- * @author siddhant.agrawal, Deepak Thakur
+ * @author siddhant.agrawal
+ * @author Deepak Thakur
  */
 public class MainActivity extends Activity {
 
     ListView listview;
     ListViewAdapter adapter;
     ProgressDialog mProgressDialog;
-    List<Population.Data> populations = new ArrayList<>();
+    List<Question> populations = new ArrayList<>();
     private volatile boolean loading = false;
 
     private class EndlessScrollListener implements AbsListView.OnScrollListener {
@@ -43,9 +46,9 @@ public class MainActivity extends Activity {
 
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                 loading = true;
-
+                /* @todo Need to send correct offset and limits going forward */
                 new DataFetcherImpl().
-                        questions().onBackpressureBuffer().
+                        getQuestions(0,0,0,"").onBackpressureBuffer().
                         subscribeOn(Schedulers.io()).
                         observeOn(AndroidSchedulers.mainThread()).
                         subscribe(new Subs()); /* TODO:  do we really need a new Subscriber each time ??  */
@@ -57,7 +60,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private final class Subs extends Subscriber<Population> {
+    private final class Subs extends Subscriber<List<Question>> {
         @Override
         public void onCompleted() {
             adapter.notifyDataSetChanged();
@@ -69,24 +72,20 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void onNext(Population population) {
-            populations.addAll(population.worldpopulation);
+        public void onNext(List<Question> questions) {
+            populations.addAll(questions);
         }
     };
 
 
-    final Subscriber<Population> populationSubscriber = new Subscriber<Population>() {
+    final Subscriber<List<Question>> populationSubscriber = new Subscriber<List<Question>>() {
         @Override
         public void onCompleted() {
-            Log.e("list size", "" + populations.size());
             Log.e("MainActivity", "before Dismiss");
             listview = (ListView) findViewById(R.id.listview);
-            // Pass the results into ListViewAdapter.java
             adapter = new ListViewAdapter(MainActivity.this, populations);
-            // Set the adapter to the ListView
             listview.setAdapter(adapter);
             listview.setOnScrollListener(new EndlessScrollListener(4));
-            // Close the progressdialog
             mProgressDialog.dismiss();
             Log.e("MainActivity", "after Dismiss");
 
@@ -100,30 +99,23 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void onNext(Population population) {
-            populations.addAll(population.worldpopulation);
+        public void onNext(List<Question> questions) {
+            populations.addAll(questions);
         }
     };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Get the view from listview_main.xml
-        setContentView(R.layout.listview_main);
-
-        Log.e("MainActity", "toStart");
+        setContentView(R.layout.questions_page);
         mProgressDialog = new ProgressDialog(MainActivity.this);
-        // Set progressdialog title
         mProgressDialog.setTitle("Android JSON Parse Tutorial");
-        // Set progressdialog message
         mProgressDialog.setMessage("Loading...");
-        // mProgressDialog.setIndeterminate(false);
-        // Show progressdialog
         mProgressDialog.show();
 
 
         new DataFetcherImpl().
-                questions().onBackpressureBuffer().
+                getQuestions(0,0,0,"").onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(populationSubscriber);

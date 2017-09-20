@@ -1,12 +1,12 @@
 package com.example.siddhantagrawal.check_discuss;
 
-/**
- * Created by siddhant.agrawal on 8/24/17.
- */
-
 import java.io.File;
 import android.content.Context;
 
+/**
+ *
+ * @author siddhant.agrawal
+ */
 public class FileCache {
 
     private File cacheDir;

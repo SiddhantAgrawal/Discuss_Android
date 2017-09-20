@@ -1,14 +1,11 @@
 package com.example.siddhantagrawal.check_discuss;
 
 
-import android.util.Log;
-
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
+import com.discuss.datatypes.Response;
 import com.google.gson.Gson;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Retrofit;
@@ -23,7 +20,6 @@ import rx.Observable;
  */
 
 public class DataFetcherImpl implements DataFetcher<Population> {
-    private static final Gson gson = new Gson();
     private static final String SERVICE_ENDPOINT = "http://192.168.0.5:8070/";
 
     private static final DiscussService discussService = new Retrofit.Builder()
@@ -34,32 +30,32 @@ public class DataFetcherImpl implements DataFetcher<Population> {
 
     @Override
     public Observable<Population> questions() {
-        return discussService.getPopulation("file.json");
+        return discussService.getPopulation("file.json").map(Response::getData);
     }
 
     @Override
-    public List<Question> getQuestions(int category, int offset, int limit, String userId) {
-        return discussService.getQuestions("questions/list?category=" + category + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId);
+    public Observable<List<Question>> getQuestions(int category, int offset, int limit, String userId) {
+        return discussService.getQuestions("questions/list?category=" + category + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
-    public List<Comment> getCommentsForQuestion(String questionId, int offset, int limit, String userId) {
-        return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId);
+    public Observable<List<Comment>> getCommentsForQuestion(String questionId, int offset, int limit, String userId) {
+        return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
-    public List<Question> getBookMarkedQuestions(int offset, int limit, String userId) {
-        return discussService.getBookMarkedQuestions("user/bookmarked/questions?offset="+ offset + "&limit=" + limit + "&userId=" + userId);
+    public Observable<List<Question>> getBookMarkedQuestions(int offset, int limit, String userId) {
+        return discussService.getBookMarkedQuestions("user/bookmarked/questions?offset="+ offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
-    public List<Comment> getUserAddedComments(int offset, int limit, String userId) {
-        return discussService.getUserAddedComments("user/comments?offset="+ offset + "&limit=" + limit + "&userId=" + userId);
+    public Observable<List<Comment>> getUserAddedComments(int offset, int limit, String userId) {
+        return discussService.getUserAddedComments("user/comments?offset="+ offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
-    public Question getQuestion(String questionId, String userId) {
-        return discussService.getQuestion("question/info?questionId=" + questionId + "&userId=" + userId);
+    public Observable<Question> getQuestion(String questionId, String userId) {
+        return discussService.getQuestion("question/info?questionId=" + questionId + "&userId=" + userId).map(Response::getData);
     }
 
     @Override

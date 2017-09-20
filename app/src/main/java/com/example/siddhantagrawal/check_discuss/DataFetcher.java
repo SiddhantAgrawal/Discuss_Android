@@ -14,15 +14,16 @@ import java.util.List;
 
 public interface DataFetcher<T> {
     Observable<T> questions();
-    List<Question> getQuestions(final int category, final int offset, final int limit, final String userId);
 
-    List<Comment> getCommentsForQuestion(final String questionId, final int offset, final int limit, final String userId);
+    Observable<List<Question>> getQuestions(final int category, final int offset, final int limit, final String userId);
 
-    List<Question> getBookMarkedQuestions(final int offset, final int limit, final String userId);
+    Observable<List<Comment>> getCommentsForQuestion(final String questionId, final int offset, final int limit, final String userId);
 
-    List<Comment> getUserAddedComments(final int offset, final int limit, final String userId);
+    Observable<List<Question>> getBookMarkedQuestions(final int offset, final int limit, final String userId);
 
-    Question getQuestion(final String questionId, final String userId);
+    Observable<List<Comment>> getUserAddedComments(final int offset, final int limit, final String userId);
+
+    Observable<Question> getQuestion(final String questionId, final String userId);
 
     boolean likeQuestion(final String questionId, final String userId);
 
