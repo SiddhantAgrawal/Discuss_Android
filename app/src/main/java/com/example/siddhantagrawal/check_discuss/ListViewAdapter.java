@@ -1,10 +1,13 @@
 package com.example.siddhantagrawal.check_discuss;
 
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,7 +16,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
+
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -54,7 +62,7 @@ class ListViewAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View itemView = inflater.inflate(R.layout.question_short, parent, false); /* @todo See if this has performance issues */
+        View itemView = inflater.inflate(R.layout.question_short, parent, false); /* TODO(Deepak): See if this has performance issues */
         final Question question = data.get(position);
 
         TextView questionText =  (TextView) itemView.findViewById(R.id.question_short_question);
@@ -70,13 +78,36 @@ class ListViewAdapter extends BaseAdapter {
             @Override
             public void onClick(View arg0) {
                 Question questionInfo = data.get(position);
-                Intent intent = new Intent(context, SingleItemView.class);
+                ArrayList<Comment> comments = new ArrayList<Comment>(); /* TODO(Deepak): find a better way */
+                new DataFetcherImpl().
+                        getCommentsForQuestion(questionInfo.getQuestionId(),0,0,"").  /* TODO(Deepak): add proper values */
+                        onBackpressureBuffer().
+                        subscribeOn(Schedulers.io()).
+                        observeOn(AndroidSchedulers.mainThread()).
+                        subscribe(new Subscriber<List<Comment>>() {
+                            @Override
+                            public void onCompleted() {
+                                Intent intent = new Intent(context, SingleItemView.class);
+                                intent.putExtra("questionText", questionInfo.getText());
+                                intent.putExtra("likes", questionInfo.getLikes());
+                                intent.putExtra("postedBy", questionInfo.getUserName());
+                                intent.putExtra("comments", comments);
+                                Log.e("got comments", "and opening question ");
+                                context.startActivity(intent);
+                            }
 
-                intent.putExtra("questionText", questionInfo.getText());
-                intent.putExtra("likes", questionInfo.getLikes());
-                intent.putExtra("postedBy", questionInfo.getUserName());
+                            @Override
+                            public void onError(Throwable e) {
 
-                context.startActivity(intent);
+                            }
+
+                            @Override
+                            public void onNext(List<Comment> fetchedComments) {
+                                Log.e("got comments", "and comments are " + fetchedComments.toString());
+                                comments.addAll(fetchedComments);
+
+                            }
+                        }); /* TODO(Deepak):  do we really need a new Subscriber each time ??  */
 
             }
         });

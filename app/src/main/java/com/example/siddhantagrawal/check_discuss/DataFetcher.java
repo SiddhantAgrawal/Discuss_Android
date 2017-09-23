@@ -17,7 +17,7 @@ public interface DataFetcher<T> {
 
     Observable<List<Question>> getQuestions(final int category, final int offset, final int limit, final String userId);
 
-    Observable<List<Comment>> getCommentsForQuestion(final String questionId, final int offset, final int limit, final String userId);
+    Observable<List<Comment>> getCommentsForQuestion(final int questionId, final int offset, final int limit, final String userId);
 
     Observable<List<Question>> getBookMarkedQuestions(final int offset, final int limit, final String userId);
 

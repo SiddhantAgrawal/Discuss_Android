@@ -39,7 +39,7 @@ public class DataFetcherImpl implements DataFetcher<Population> {
     }
 
     @Override
-    public Observable<List<Comment>> getCommentsForQuestion(String questionId, int offset, int limit, String userId) {
+    public Observable<List<Comment>> getCommentsForQuestion(int questionId, int offset, int limit, String userId) {
         return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 

@@ -48,10 +48,11 @@ public class MainActivity extends Activity {
                 loading = true;
                 /* @todo Need to send correct offset and limits going forward */
                 new DataFetcherImpl().
-                        getQuestions(0,0,0,"").onBackpressureBuffer().
+                        getQuestions(0,0,0,""). /* TODO(Deepak): add proper values */
+                        onBackpressureBuffer().
                         subscribeOn(Schedulers.io()).
                         observeOn(AndroidSchedulers.mainThread()).
-                        subscribe(new Subs()); /* TODO:  do we really need a new Subscriber each time ??  */
+                        subscribe(new Subs()); /* TODO(Deepak):  do we really need a new Subscriber each time ??  */
             }
         }
 
