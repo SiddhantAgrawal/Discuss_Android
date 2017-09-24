@@ -131,22 +131,17 @@ public class MainActivity extends Activity {
 // nav drawer title
 
 
-         List<RowItem> rowItems;
-         CustomMenuAdaptor adapter;
+        List<String> rowItems = new ArrayList<String>();
         mTitle = mDrawerTitle = getTitle();
         menutitles = getResources().getStringArray(R.array.titles);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.slider_list);
 
-        rowItems = new ArrayList<RowItem>();
-
         for (int i = 0; i < menutitles.length; i++) {
-            RowItem items = new RowItem(menutitles[i]);
-            rowItems.add(items);
+            rowItems.add(menutitles[i]);
+            Log.e("Main", "and item is " + menutitles[i]);
         }
-        adapter = new CustomMenuAdaptor(getApplicationContext(), rowItems);
-        String[] menu = new String[]{"Home","Android","Windows","Linux","Raspberry Pi","WordPress","Videos","Contact Us"};
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, menu));
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, (String[]) rowItems.toArray(new String[rowItems.size()])));
       //  mDrawerList.setAdapter(adapter);
         mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
@@ -225,11 +220,16 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
+        if(getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
+        /*if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }*/
 
     }
     @Override
