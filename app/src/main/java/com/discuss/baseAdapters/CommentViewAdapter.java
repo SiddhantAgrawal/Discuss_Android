@@ -16,7 +16,7 @@ import java.util.List;
 
 
 public class CommentViewAdapter extends BaseAdapter {
-    // Declare Variables
+
     private Context context;
     private List<Comment> data;
 

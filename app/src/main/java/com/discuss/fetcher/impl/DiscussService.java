@@ -28,6 +28,9 @@ interface DiscussService {
     Observable<Response<List<Question>>> getBookMarkedQuestions(@Url final String pathParams);
 
     @GET
+    Observable<Response<List<Question>>> getLikedQuestions(@Url final String pathParams);
+
+    @GET
     Observable<Response<List<Comment>>> getUserAddedComments(@Url final String pathParams);
 
     @GET

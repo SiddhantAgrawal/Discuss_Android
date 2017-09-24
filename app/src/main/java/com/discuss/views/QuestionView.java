@@ -32,7 +32,6 @@ public class QuestionView extends Activity {
     private final class Subs extends Subscriber<List<Comment>> {
         @Override
         public void onCompleted() {
-            Log.e("loading comments now", "undating the comments");
             adapter.notifyDataSetChanged();
             loading = false;
         }
@@ -43,8 +42,6 @@ public class QuestionView extends Activity {
 
         @Override
         public void onNext(List<Comment> questions) {
-            Log.e("loading comments now", "got fresh list " + questions.size());
-            Log.e("loading comments now", "the new size of comments is " + questions.size());
             populations.addAll(questions);
         }
     };
@@ -65,7 +62,6 @@ public class QuestionView extends Activity {
                              int visibleItemCount, int totalItemCount) {
 
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-                Log.e("loading comments now", "plz wait");
                 loading = true;
                 new DataFetcherImpl().
                         getCommentsForQuestion(0,0,0,"").  /* TODO(Deepak): add proper values */

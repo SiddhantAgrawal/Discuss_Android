@@ -22,12 +22,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.discuss.baseAdapters.QuestionViewAdapter;
+import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
 import com.discuss.fragment.BookMarkFragment;
 import com.discuss.fragment.LikedQuestionsFragment;
-import com.discuss.fragment.AddedCommentsFragment;
+import com.discuss.fragment.UserAddedCommentsFragment;
+import com.discuss.fragment.factory.BookmarkedQuestionsFragmentFactory;
+import com.discuss.fragment.factory.FragmentFactory;
+import com.discuss.fragment.factory.LikedQuestionsFragmentFactory;
+import com.discuss.fragment.factory.UserAddedCommenstsFragmentFactory;
 
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -129,28 +135,42 @@ public class MainActivity extends Activity {
         mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Fragment fragment = null;
+                Observable<Fragment> fragment = null;
+                FragmentFactory<Question> bookMarkFragmentFactory = new BookmarkedQuestionsFragmentFactory();
+                FragmentFactory<Question> likedQuestionFragmentFactory = new LikedQuestionsFragmentFactory();
+                FragmentFactory<Comment> userAddedCommentsFactory = new UserAddedCommenstsFragmentFactory();
                 switch (position) {
                     case 0:
-                        fragment = new BookMarkFragment();
+                        fragment = bookMarkFragmentFactory.createFragment();
                         break;
                     case 1:
-                        fragment = new LikedQuestionsFragment();
+                        fragment = likedQuestionFragmentFactory.createFragment();
+                        Log.e("mains", "selected likes");
                         break;
                     case 2:
-                        fragment = new AddedCommentsFragment();
+                        fragment = userAddedCommentsFactory.createFragment();
                         break;
                     default:
                         break;
                 }
-                if (fragment != null) {
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.frame_container, fragment).addToBackStack(null).commit();
-                    mDrawerLayout.closeDrawer(mDrawerList);
-                }
-                else {
-                    Log.e("MainActivity", "Error in creating fragment");
-                }
+
+                fragment.subscribeOn(Schedulers.io()).
+                        observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<Fragment>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(Fragment fragment) {
+                        FragmentManager fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.frame_container, fragment).addToBackStack(null).commit();
+                        mDrawerLayout.closeDrawer(mDrawerList);
+                    }
+                });
             }
         });
         getActionBar().setDisplayHomeAsUpEnabled(true);

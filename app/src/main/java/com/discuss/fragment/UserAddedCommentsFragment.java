@@ -8,13 +8,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.discuss.baseAdapters.CommentViewAdapter;
+import com.discuss.datatypes.Comment;
+import com.example.siddhantagrawal.check_discuss.R;
+
 import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.discuss.baseAdapters.QuestionViewAdapter;
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
-import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +26,9 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class LikedQuestionsFragment extends Fragment {
+public class UserAddedCommentsFragment extends Fragment {
     private volatile boolean loading = false;
-    ArrayList<Question> questions;
+    ArrayList<Comment> comments;
     private class EndlessScrollListener implements AbsListView.OnScrollListener {
         private volatile int visibleThreshold = 5;
         EndlessScrollListener(int visibleThreshold) {
@@ -40,11 +43,11 @@ public class LikedQuestionsFragment extends Fragment {
                 loading = true;
                 /* @todo Need to send correct offset and limits going forward */
                 new DataFetcherImpl().
-                        getLikedQuestions(0,0,""). /* TODO(Deepak): add proper values */
+                        getUserAddedComments(0,0,""). /* TODO(Deepak): add proper values */
                         onBackpressureBuffer().
                         subscribeOn(Schedulers.io()).
                         observeOn(AndroidSchedulers.mainThread()).
-                        subscribe(new Subscriber<List<Question>>() {
+                        subscribe(new Subscriber<List<Comment>>() {
                             @Override
                             public void onCompleted() {
                                 adapter.notifyDataSetChanged();
@@ -56,8 +59,8 @@ public class LikedQuestionsFragment extends Fragment {
                             }
 
                             @Override
-                            public void onNext(List<Question> fetchedQuestions) {
-                                questions.addAll(fetchedQuestions);
+                            public void onNext(List<Comment> fetchedComments) {
+                                comments.addAll(fetchedComments);
                             }
                         }); /* TODO(Deepak):  do we really need a new Subscriber each time ??  */
             }
@@ -68,17 +71,16 @@ public class LikedQuestionsFragment extends Fragment {
         }
     }
     private ListView listView;
-    QuestionViewAdapter adapter;
+    CommentViewAdapter adapter;
 
     @SuppressWarnings(value = "unchecked")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View itemView = inflater.inflate(R.layout.fragment_liked_questions, container, false);
-        listView =  (ListView) itemView.findViewById(R.id.fragment_liked_questions);
+        View itemView = inflater.inflate(R.layout.fragment_added_comments, container, false);
+        listView =  (ListView) itemView.findViewById(R.id.fragment_added_comments);
 
-        questions = (ArrayList<Question>) getArguments().getSerializable("data");
-        Log.e("liked questions", questions.toString());
-        adapter = new QuestionViewAdapter(getActivity(), questions);
+        comments = (ArrayList<Comment>) getArguments().getSerializable("data");
+        adapter = new CommentViewAdapter(getActivity(), comments);
         listView.setAdapter(adapter);
         listView.setOnScrollListener(new EndlessScrollListener(4));
         return itemView;
