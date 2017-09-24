@@ -1,10 +1,10 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.fetcher.impl;
 
 
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
-import com.google.gson.Gson;
+import com.discuss.fetcher.DataFetcher;
 
 import java.util.List;
 
@@ -13,13 +13,12 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 
-
 /**
  * @author Deepak Thakur
  *
  */
 
-public class DataFetcherImpl implements DataFetcher<Population> {
+public class DataFetcherImpl implements DataFetcher {
     private static final String SERVICE_ENDPOINT = "http://192.168.0.5:8070/";
 
     private static final DiscussService discussService = new Retrofit.Builder()
@@ -27,11 +26,6 @@ public class DataFetcherImpl implements DataFetcher<Population> {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build().create(DiscussService.class);
-
-    @Override
-    public Observable<Population> questions() {
-        return discussService.getPopulation("file.json").map(Response::getData);
-    }
 
     @Override
     public Observable<List<Question>> getQuestions(int category, int offset, int limit, String userId) {

@@ -1,24 +1,22 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.fetcher.impl;
 
-import java.util.List;
 
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
 
+import java.util.List;
+
 import retrofit2.http.GET;
 import retrofit2.http.Url;
+
 import rx.Observable;
 
 /**
  * @author Deepak Thakur
  *
  */
-
 interface DiscussService {
-
-    @GET
-    Observable<Response<Population>> getPopulation(@Url final String pathParams) ;
 
     @GET
     Observable<Response<List<Question>>> getQuestions(@Url final String pathParams);

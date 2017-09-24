@@ -21,8 +21,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-
+import com.discuss.baseAdapters.QuestionViewAdapter;
 import com.discuss.datatypes.Question;
+import com.discuss.fetcher.impl.DataFetcherImpl;
 import com.discuss.fragment.BookMarkFragment;
 import com.discuss.fragment.LikedQuestionsFragment;
 import com.discuss.fragment.AddedCommentsFragment;
@@ -38,7 +39,7 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends Activity {
 
     ListView listview;
-    ListViewAdapter adapter;
+    QuestionViewAdapter adapter;
     ProgressDialog mProgressDialog;
     ActionBarDrawerToggle mDrawerToggle;
     List<Question> populations = new ArrayList<>();
@@ -95,7 +96,7 @@ public class MainActivity extends Activity {
         public void onCompleted() {
             Log.e("MainActivity", "before Dismiss");
             listview = (ListView) findViewById(R.id.listview);
-            adapter = new ListViewAdapter(MainActivity.this, populations);
+            adapter = new QuestionViewAdapter(MainActivity.this, populations);
             listview.setAdapter(adapter);
             listview.setOnScrollListener(new EndlessScrollListener(4));
             mProgressDialog.dismiss();

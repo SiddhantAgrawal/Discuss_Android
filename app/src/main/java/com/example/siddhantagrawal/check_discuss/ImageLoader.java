@@ -1,9 +1,5 @@
 package com.example.siddhantagrawal.check_discuss;
 
-/**
- * Created by siddhant.agrawal on 8/24/17.
- */
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,6 +20,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
+/**
+ * @author Siddhant Agrawal
+ */
 public class ImageLoader {
 
     MemoryCache memoryCache = new MemoryCache();

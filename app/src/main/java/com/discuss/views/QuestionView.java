@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.views;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -9,8 +9,10 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.discuss.baseAdapters.CommentViewAdapter;
 import com.discuss.datatypes.Comment;
-import com.discuss.datatypes.Question;
+import com.discuss.fetcher.impl.DataFetcherImpl;
+import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +25,8 @@ import rx.schedulers.Schedulers;
  * @author Siddhant Agrawal
  * @author Deepak Thakur
  */
-public class SingleItemView extends Activity {
-    CommentViewAdaptor adapter;
+public class QuestionView extends Activity {
+    CommentViewAdapter adapter;
     ArrayList<Comment> populations;
 
     private final class Subs extends Subscriber<List<Comment>> {
@@ -100,7 +102,7 @@ public class SingleItemView extends Activity {
         textViewForPostedBy.setText(intent.getStringExtra("postedBy"));
 
         ListView listview = (ListView) findViewById(R.id.question_complete_commentList);
-        adapter = new CommentViewAdaptor(SingleItemView.this, populations);
+        adapter = new CommentViewAdapter(QuestionView.this, populations);
 
         listview.setAdapter(adapter);
         listview.setOnScrollListener(new EndlessScrollListener(4));

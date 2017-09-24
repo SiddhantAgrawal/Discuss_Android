@@ -1,7 +1,6 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.baseAdapters;
 
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +12,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
+import com.discuss.fetcher.impl.DataFetcherImpl;
+import com.example.siddhantagrawal.check_discuss.R;
+import com.discuss.views.QuestionView;
 
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -30,14 +31,14 @@ import rx.schedulers.Schedulers;
  * @author Deepak Thakur
  *
  */
-class ListViewAdapter extends BaseAdapter {
+public class QuestionViewAdapter extends BaseAdapter {
 
     // Declare Variables
     private Context context;
     private List<Question> data;
 
-    ListViewAdapter(Context context,
-                    List<Question> arraylist) {
+    public QuestionViewAdapter(Context context,
+                        List<Question> arraylist) {
         this.context = context;
         data = arraylist;
     }
@@ -87,7 +88,7 @@ class ListViewAdapter extends BaseAdapter {
                         subscribe(new Subscriber<List<Comment>>() {
                             @Override
                             public void onCompleted() {
-                                Intent intent = new Intent(context, SingleItemView.class);
+                                Intent intent = new Intent(context, QuestionView.class);
                                 intent.putExtra("questionText", questionInfo.getText());
                                 intent.putExtra("likes", questionInfo.getLikes());
                                 intent.putExtra("postedBy", questionInfo.getUserName());

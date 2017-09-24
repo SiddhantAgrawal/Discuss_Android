@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.fetcher;
 
 
 import com.discuss.datatypes.Comment;
@@ -12,9 +12,7 @@ import java.util.List;
  *
  */
 
-public interface DataFetcher<T> {
-    Observable<T> questions();
-
+public interface DataFetcher {
     Observable<List<Question>> getQuestions(final int category, final int offset, final int limit, final String userId);
 
     Observable<List<Comment>> getCommentsForQuestion(final int questionId, final int offset, final int limit, final String userId);

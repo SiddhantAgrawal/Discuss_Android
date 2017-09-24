@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.baseAdapters;
 
 
 import android.annotation.SuppressLint;
@@ -10,18 +10,19 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.discuss.datatypes.Comment;
+import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.List;
 
 
-public class CommentViewAdaptor extends BaseAdapter {
+public class CommentViewAdapter extends BaseAdapter {
     // Declare Variables
     private Context context;
     private List<Comment> data;
 
 
-    CommentViewAdaptor(Context context,
-                    List<Comment> arraylist) {
+    public CommentViewAdapter(Context context,
+                       List<Comment> arraylist) {
         this.context = context;
         data = arraylist;
     }
