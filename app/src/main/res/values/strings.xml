@@ -8,9 +8,6 @@
     <string name="openDrawer">open_drawer</string>
     <string name="imgdesc">imgdesc</string>
     <string name="action_settings">"action_settings"</string>
-    <string name="frag_a">"we r my frag1"</string>
-    <string name="frag_b">"we r my frag2"</string>
-    <string name="frag_c">"we r my frag3"</string>
     <string-array name="titles">
         <item>BookMarks</item>
         <item>Questions Liked</item>

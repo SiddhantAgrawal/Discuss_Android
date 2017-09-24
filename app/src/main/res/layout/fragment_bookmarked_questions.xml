@@ -12,6 +12,6 @@ android:layout_height="match_parent">
     android:textSize="40sp"
     android:textColor="#000000"
     android:layout_gravity="center"
-    android:id="@+id/frag1"/>
+    android:id="@+id/fragment_bookmarked_questions"/>
 
 </LinearLayout>
