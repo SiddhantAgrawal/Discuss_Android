@@ -3,15 +3,17 @@ package com.example.siddhantagrawal.check_discuss;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,13 +27,11 @@ import com.discuss.baseAdapters.QuestionViewAdapter;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
-import com.discuss.fragment.BookMarkFragment;
-import com.discuss.fragment.LikedQuestionsFragment;
-import com.discuss.fragment.UserAddedCommentsFragment;
 import com.discuss.fragment.factory.BookmarkedQuestionsFragmentFactory;
 import com.discuss.fragment.factory.FragmentFactory;
 import com.discuss.fragment.factory.LikedQuestionsFragmentFactory;
 import com.discuss.fragment.factory.UserAddedCommenstsFragmentFactory;
+import com.discuss.views.AskQuestionView;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -42,7 +42,7 @@ import rx.schedulers.Schedulers;
  * @author siddhant.agrawal
  * @author Deepak Thakur
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     ListView listview;
     QuestionViewAdapter adapter;
@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.questions_page);
+        setContentView(R.layout.main_activity);
         mTitle = mDrawerTitle = getTitle();
         String[] menutitles = getResources().getStringArray(R.array.titles);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -173,8 +173,8 @@ public class MainActivity extends Activity {
                 });
             }
         });
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.app_name, R.string.app_name) {
             public void onDrawerClosed(View view) {
@@ -194,6 +194,14 @@ public class MainActivity extends Activity {
         mProgressDialog.setMessage("loading... thanks for your patience");
         mProgressDialog.show();
 
+        FloatingActionButton FAB = (FloatingActionButton) findViewById(R.id.fab);
+        FAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AskQuestionView.class);
+                MainActivity.this.startActivity(intent);
+            }
+        });
 
         new DataFetcherImpl().
                 getQuestions(0,0,0,"").onBackpressureBuffer().

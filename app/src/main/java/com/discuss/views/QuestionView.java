@@ -27,7 +27,7 @@ import rx.schedulers.Schedulers;
  */
 public class QuestionView extends Activity {
     CommentViewAdapter adapter;
-    ArrayList<Comment> populations;
+    ArrayList<Comment> comments;
 
     private final class Subs extends Subscriber<List<Comment>> {
         @Override
@@ -42,7 +42,7 @@ public class QuestionView extends Activity {
 
         @Override
         public void onNext(List<Comment> questions) {
-            populations.addAll(questions);
+            comments.addAll(questions);
         }
     };
 
@@ -88,17 +88,19 @@ public class QuestionView extends Activity {
 
         TextView textViewForQuestion = (TextView) findViewById(R.id.question_complete_question);
         TextView textViewForLikes = (TextView) findViewById(R.id.question_complete_like_value);
-        TextView textViewForPostedBy = (TextView) findViewById(R.id.question_complete_user_value);
+        TextView textViewForPostedBy = (TextView) findViewById(R.id.question_complete_postedby_value);
+        TextView textViewForDifficultyLevel = (TextView) findViewById(R.id.question_complete_difficulty_value);
 
-        populations = (ArrayList<Comment>) intent.getSerializableExtra("comments");
+        comments = (ArrayList<Comment>) intent.getSerializableExtra("comments");
 
         /* set results to the TextViews */
         textViewForQuestion.setText(intent.getStringExtra("questionText"));
         textViewForLikes.setText(Integer.toString(intent.getIntExtra("likes", 0)));
         textViewForPostedBy.setText(intent.getStringExtra("postedBy"));
+        textViewForDifficultyLevel.setText(intent.getStringExtra("difficulty"));
 
         ListView listview = (ListView) findViewById(R.id.question_complete_commentList);
-        adapter = new CommentViewAdapter(QuestionView.this, populations);
+        adapter = new CommentViewAdapter(QuestionView.this, comments);
 
         listview.setAdapter(adapter);
         listview.setOnScrollListener(new EndlessScrollListener(4));

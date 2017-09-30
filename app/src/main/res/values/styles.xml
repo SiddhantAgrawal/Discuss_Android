@@ -9,4 +9,23 @@
         <item name="android:windowActionBar">true</item>
     </style>
 
+
+
+    <style name="Base.AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    </style>
+
+
+
+    <style name="AppTheme.PopupOverlay" parent="AppTheme.PopupOverlay">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/colorPrimaryDark</item>
+    </style>
+
 </resources>

@@ -68,11 +68,13 @@ public class QuestionViewAdapter extends BaseAdapter {
 
         TextView questionText =  (TextView) itemView.findViewById(R.id.question_short_question);
         TextView likes = (TextView) itemView.findViewById(R.id.question_short_like_value);
-        TextView postedBy = (TextView) itemView.findViewById(R.id.question_short_user_value);
+        TextView postedBy = (TextView) itemView.findViewById(R.id.question_short_postedby_value);
+        TextView difficulty = (TextView) itemView.findViewById(R.id.question_short_difficulty_value) ;
 
         questionText.setText(question.getText());
         likes.setText(Integer.toString(question.getLikes()));
         postedBy.setText(question.getUserName());
+        difficulty.setText(question.getDifficulty());
 
         itemView.setOnClickListener(new OnClickListener() {
 
@@ -92,6 +94,7 @@ public class QuestionViewAdapter extends BaseAdapter {
                                 intent.putExtra("questionText", questionInfo.getText());
                                 intent.putExtra("likes", questionInfo.getLikes());
                                 intent.putExtra("postedBy", questionInfo.getUserName());
+                                intent.putExtra("difficulty", questionInfo.getDifficulty());
                                 intent.putExtra("comments", comments);
                                 Log.e("got comments", "and opening question ");
                                 context.startActivity(intent);

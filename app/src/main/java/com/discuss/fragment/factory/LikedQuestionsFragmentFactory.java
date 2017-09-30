@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
-import com.discuss.fragment.BookMarkFragment;
 import com.discuss.fragment.LikedQuestionsFragment;
 
 import java.util.ArrayList;
