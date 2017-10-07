@@ -5,13 +5,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.discuss.baseAdapters.CommentViewAdapter;
+import com.discuss.baseAdapters.QuestionViewAdapter;
 import com.discuss.datatypes.Comment;
+import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
+import com.example.siddhantagrawal.check_discuss.MainActivity;
 import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.ArrayList;
@@ -20,6 +25,8 @@ import java.util.List;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+import static com.example.siddhantagrawal.check_discuss.R.id.listview;
 
 /**
  * @author Siddhant Agrawal
@@ -82,7 +89,7 @@ public class QuestionView extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.question_complete);
+        setContentView(R.layout.question);
 
         Intent intent = getIntent();
 
@@ -93,16 +100,16 @@ public class QuestionView extends Activity {
 
         comments = (ArrayList<Comment>) intent.getSerializableExtra("comments");
 
-        /* set results to the TextViews */
-        textViewForQuestion.setText(intent.getStringExtra("questionText"));
-        textViewForLikes.setText(Integer.toString(intent.getIntExtra("likes", 0)));
-        textViewForPostedBy.setText(intent.getStringExtra("postedBy"));
-        textViewForDifficultyLevel.setText(intent.getStringExtra("difficulty"));
-
-        ListView listview = (ListView) findViewById(R.id.question_complete_commentList);
-        adapter = new CommentViewAdapter(QuestionView.this, comments);
+        Question.QuestionBuilder questionBuilder = new Question.QuestionBuilder();
+        questionBuilder.setText(intent.getStringExtra("questionText"));
+        questionBuilder.setLikes(intent.getIntExtra("likes", 0));
+        questionBuilder.setUserName(intent.getStringExtra("postedBy"));
+        questionBuilder.setDifficulty(intent.getStringExtra("difficulty"));
+        ListView listview = (ListView) findViewById(R.id.question_view);
+        adapter = new CommentViewAdapter(QuestionView.this, comments, questionBuilder.build());
 
         listview.setAdapter(adapter);
         listview.setOnScrollListener(new EndlessScrollListener(4));
+
     }
 }

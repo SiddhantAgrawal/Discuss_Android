@@ -80,7 +80,7 @@ public class UserAddedCommentsFragment extends Fragment {
         listView =  (ListView) itemView.findViewById(R.id.fragment_added_comments);
 
         comments = (ArrayList<Comment>) getArguments().getSerializable("data");
-        adapter = new CommentViewAdapter(getActivity(), comments);
+        adapter = new CommentViewAdapter(getActivity(), comments, null);
         listView.setAdapter(adapter);
         listView.setOnScrollListener(new EndlessScrollListener(4));
         return itemView;

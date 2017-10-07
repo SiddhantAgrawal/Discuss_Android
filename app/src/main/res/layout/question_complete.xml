@@ -1,131 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:weightSum="1">
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/question_complete_view_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:textStyle="normal"
-                android:textSize="20sp"
-                android:text="@string/views" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/question_complete_view_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="normal"
-                android:textSize="20sp"
-                android:layout_toEndOf="@+id/question_complete_view_label" />
-
-            <TextView
-                android:id="@+id/question_complete_difficulty_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toStartOf="@+id/question_complete_difficulty_value"
-                android:textStyle="normal"
-                android:textSize="20sp"
-                android:text="@string/difficulty" />
-
-            <TextView
-                android:id="@+id/question_complete_difficulty_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="normal"
-                android:textSize="20sp"
-                android:layout_alignParentEnd="true" />
-
-        </RelativeLayout>
         <TextView
-            android:id="@+id/question_complete_question"
+            android:id="@+id/question_complete_view_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="25sp" />
+            android:layout_alignParentStart="true"
+            android:text="@string/views"
+            android:textSize="20sp"
+            android:textStyle="normal" />
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="fill_parent"
+        <TextView
+            android:id="@+id/question_complete_view_value"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
+            android:layout_toEndOf="@+id/question_complete_view_label"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/question_complete_difficulty_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/question_complete_difficulty_value"
+            android:text="@string/difficulty"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/question_complete_difficulty_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/question_complete_question"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/pic" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/question_complete_like_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:text="@string/like_label"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/question_complete_like_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/question_complete_like_label"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/question_complete_postedby_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/question_complete_like_value"
+            android:text="@string/posted_by"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/question_complete_postedby_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/question_complete_postedby_label"
+            android:layout_toEndOf="@+id/question_complete_postedby_label"
+            android:textSize="20sp"
+            android:textStyle="normal" />
+
+        <ImageButton
+            android:id="@+id/ib"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:adjustViewBounds="true"
-            android:src="@drawable/pic" />
+            android:maxHeight="70dp"
+            android:maxWidth="70dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/bookmark" />
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/question_complete_like_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:text="@string/like_label"
-                android:textSize="20sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:id="@+id/question_complete_like_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@+id/question_complete_like_label"
-                android:textSize="20sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:id="@+id/question_complete_postedby_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/question_complete_like_value"
-                android:layout_alignParentStart="true"
-                android:text="@string/posted_by"
-                android:textSize="20sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:id="@+id/question_complete_postedby_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@+id/question_complete_postedby_label"
-                android:layout_alignBaseline="@+id/question_complete_postedby_label"
-                android:textSize="20sp"
-                android:textStyle="normal" />
-
-            <ImageButton
-                android:id="@+id/ib"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:adjustViewBounds="true"
-                android:maxWidth="70dp"
-                android:maxHeight="70dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/bookmark" />
-
-        </RelativeLayout>
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="30dp"
+        android:text="@string/comment_tag"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:text="@string/comment_tag"/>
+        android:textStyle="bold" />
+
     <Space
         android:layout_width="wrap_content"
-        android:layout_height="12dp"/>
+        android:layout_height="12dp" />
 
     <ListView
         android:id="@+id/question_complete_commentList"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"/>
-
+        android:dividerHeight="1dp" />
 
 </LinearLayout>
