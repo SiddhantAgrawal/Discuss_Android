@@ -46,27 +46,41 @@
         <Space
             android:layout_width="wrap_content"
             android:layout_height="12dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="25sp"
-            android:textColor="@color/black"
-            android:text="@string/tag"/>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="1">
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="12dp"/>
+            <Spinner
+                android:id="@+id/ask_question_tag_button"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:background="@android:drawable/spinner_dropdown_background"
+                android:spinnerMode="dropdown"
+                android:layout_weight="0.50" />
 
-        <Spinner
-            android:id="@+id/spinner1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/btn_dropdown"
-            android:spinnerMode="dropdown" />
+            <Button
+                android:id="@+id/ask_question_choose_image"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/choose_image"
+                android:layout_weight="0.5"/>
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="12dp"/>
+            <!-- <TextView
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:textSize="25sp"
+                 android:textColor="@color/black"
+                 android:text="@string/upload_image"/>
+
+             <Spinner
+                 android:id="@+id/upload_image"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:background="@android:drawable/btn_dropdown"
+                 android:spinnerMode="dropdown" />-->
+
+        </LinearLayout>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
@@ -76,6 +90,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:backgroundTint="@color/colorPrimaryDark"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@drawable/checked" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -1,6 +1,7 @@
 package com.discuss.fetcher.impl;
 
 
+import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
@@ -35,6 +36,9 @@ interface DiscussService {
 
     @GET
     Observable<Response<Question>> getQuestion(@Url final String pathParams);
+
+    @GET
+    Observable<Response<List<Category>>> getCategory(@Url final String pathParams);
 
     @GET
     public boolean likeQuestion(@Url final String pathParams); /* @todo Make it PUT  */

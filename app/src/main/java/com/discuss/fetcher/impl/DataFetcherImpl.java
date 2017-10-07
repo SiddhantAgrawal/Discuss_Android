@@ -1,6 +1,7 @@
 package com.discuss.fetcher.impl;
 
 
+import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
@@ -19,7 +20,7 @@ import rx.Observable;
  */
 
 public class DataFetcherImpl implements DataFetcher {
-    private static final String SERVICE_ENDPOINT = "http://192.168.0.5:8070/";
+    private static final String SERVICE_ENDPOINT = "http://10.14.125.250:8070/";
 
     private static final DiscussService discussService = new Retrofit.Builder()
                 .baseUrl(DataFetcherImpl.SERVICE_ENDPOINT)
@@ -55,6 +56,11 @@ public class DataFetcherImpl implements DataFetcher {
     @Override
     public Observable<Question> getQuestion(String questionId, String userId) {
         return discussService.getQuestion("question/info?questionId=" + questionId + "&userId=" + userId).map(Response::getData);
+    }
+
+    @Override
+    public Observable<List<Category>> getCategory() {
+        return discussService.getCategory("category/list").map(Response::getData);
     }
 
     @Override

@@ -1,8 +1,13 @@
 package com.discuss.fetcher;
 
 
+import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
+import com.discuss.datatypes.Response;
+
+import retrofit2.http.GET;
+import retrofit2.http.Url;
 import rx.Observable;
 
 import java.util.List;
@@ -24,6 +29,8 @@ public interface DataFetcher {
     Observable<List<Comment>> getUserAddedComments(final int offset, final int limit, final String userId);
 
     Observable<Question> getQuestion(final String questionId, final String userId);
+
+    Observable<List<Category>> getCategory();
 
     boolean likeQuestion(final String questionId, final String userId);
 
