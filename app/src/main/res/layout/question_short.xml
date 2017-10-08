@@ -63,20 +63,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <ImageView
+            android:id="@+id/question_short_like_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="like_image"
+            android:src="@drawable/liked" />
+
+        <!--<TextView
             android:id="@+id/question_short_like_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:text="@string/like_label"
             android:textSize="20sp"
-            android:textStyle="normal" />
+            android:textStyle="normal" />-->
 
         <TextView
             android:id="@+id/question_short_like_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/question_short_like_label"
+            android:layout_toEndOf="@+id/question_short_like_button"
             android:text="23"
             android:textSize="20sp"
             android:textStyle="normal" />

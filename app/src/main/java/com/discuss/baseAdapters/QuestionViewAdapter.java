@@ -6,17 +6,21 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
+import com.example.siddhantagrawal.check_discuss.MainActivity;
 import com.example.siddhantagrawal.check_discuss.R;
 import com.discuss.views.QuestionView;
 
@@ -75,7 +79,35 @@ public class QuestionViewAdapter extends BaseAdapter {
         likes.setText(Integer.toString(question.getLikes()));
         postedBy.setText(question.getUserName());
         difficulty.setText(question.getDifficulty());
-
+        ImageView imageView = itemView.findViewById(R.id.question_short_like_button);
+        if (question.isLiked())
+            imageView.setImageDrawable(ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.liked));
+        else
+            imageView.setImageDrawable(ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.like_icon));
+        final boolean questionOrigionallyLiked = question.isLiked();
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    Log.e("user has liked :- ", String.valueOf(question.isLiked()));
+                    if (question.isLiked()) {
+                        imageView.setImageDrawable(ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.like_icon));
+                        if(questionOrigionallyLiked)
+                            likes.setText(Integer.toString(question.getLikes() - 1));
+                        else
+                            likes.setText(Integer.toString(question.getLikes()));
+                    } else {
+                        imageView.setImageDrawable(ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.liked));
+                        if(!questionOrigionallyLiked)
+                            likes.setText(Integer.toString(question.getLikes() + 1));
+                        else
+                            likes.setText(Integer.toString(question.getLikes()));
+                    }
+                    question.setLiked(!question.isLiked());
+                }
+                return true;
+            }
+        });
         itemView.setOnClickListener(new OnClickListener() {
 
             @Override

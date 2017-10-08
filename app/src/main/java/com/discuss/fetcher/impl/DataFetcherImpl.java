@@ -20,7 +20,7 @@ import rx.Observable;
  */
 
 public class DataFetcherImpl implements DataFetcher {
-    private static final String SERVICE_ENDPOINT = "http://10.14.125.250:8070/";
+    private static final String SERVICE_ENDPOINT = "http://192.168.0.5:8070/";
 
     private static final DiscussService discussService = new Retrofit.Builder()
                 .baseUrl(DataFetcherImpl.SERVICE_ENDPOINT)
