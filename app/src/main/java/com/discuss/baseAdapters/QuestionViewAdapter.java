@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
-import com.example.siddhantagrawal.check_discuss.MainActivity;
+import com.discuss.ui.feed.MainFeedPresenter;
 import com.example.siddhantagrawal.check_discuss.R;
 import com.discuss.views.QuestionView;
 
@@ -39,17 +39,16 @@ public class QuestionViewAdapter extends BaseAdapter {
 
     // Declare Variables
     private Context context;
-    private List<Question> data;
+    private MainFeedPresenter<Question> mainFeedPresenter;
 
-    public QuestionViewAdapter(Context context,
-                        List<Question> arraylist) {
+    public QuestionViewAdapter(Context context, MainFeedPresenter<Question> mainFeedPresenter) {
         this.context = context;
-        data = arraylist;
+        this.mainFeedPresenter = mainFeedPresenter;
     }
 
     @Override
     public int getCount() {
-        return data.size();
+        return mainFeedPresenter.size();
     }
 
     @Override
@@ -68,7 +67,7 @@ public class QuestionViewAdapter extends BaseAdapter {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View itemView = inflater.inflate(R.layout.question_short, parent, false); /* TODO(Deepak): See if this has performance issues */
-        final Question question = data.get(position);
+        final Question question = mainFeedPresenter.get(position).toBlocking().first();
 
         TextView questionText =  (TextView) itemView.findViewById(R.id.question_short_question);
         TextView likes = (TextView) itemView.findViewById(R.id.question_short_like_value);
@@ -112,7 +111,7 @@ public class QuestionViewAdapter extends BaseAdapter {
 
             @Override
             public void onClick(View arg0) {
-                Question questionInfo = data.get(position);
+                Question questionInfo = mainFeedPresenter.get(position).toBlocking().first();
                 ArrayList<Comment> comments = new ArrayList<Comment>(); /* TODO(Deepak): find a better way */
                 new DataFetcherImpl().
                         getCommentsForQuestion(questionInfo.getQuestionId(),0,0,"").  /* TODO(Deepak): add proper values */

@@ -4,19 +4,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.discuss.baseAdapters.CommentViewAdapter;
-import com.discuss.baseAdapters.QuestionViewAdapter;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.fetcher.impl.DataFetcherImpl;
-import com.example.siddhantagrawal.check_discuss.MainActivity;
 import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.ArrayList;
@@ -25,8 +20,6 @@ import java.util.List;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-
-import static com.example.siddhantagrawal.check_discuss.R.id.listview;
 
 /**
  * @author Siddhant Agrawal

@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.ui.feed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,14 @@ import com.discuss.fragment.factory.BookmarkedQuestionsFragmentFactory;
 import com.discuss.fragment.factory.FragmentFactory;
 import com.discuss.fragment.factory.LikedQuestionsFragmentFactory;
 import com.discuss.fragment.factory.UserAddedCommenstsFragmentFactory;
+import com.discuss.ui.feed.impl.MainFeedPresenterImpl;
 import com.discuss.views.AskQuestionView;
+import com.example.siddhantagrawal.check_discuss.R;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
 /**
@@ -48,15 +51,15 @@ public class MainActivity extends AppCompatActivity {
     QuestionViewAdapter adapter;
     ProgressDialog mProgressDialog;
     ActionBarDrawerToggle mDrawerToggle;
-    List<Question> populations = new ArrayList<>();
     CharSequence mDrawerTitle;
     CharSequence mTitle;
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
-    private volatile boolean loading = false;
+    MainFeedPresenter<Question> mainFeedPresenter = new MainFeedPresenterImpl();
 
     private class EndlessScrollListener implements AbsListView.OnScrollListener {
         private volatile int visibleThreshold = 5;
+
         EndlessScrollListener(int visibleThreshold) {
             this.visibleThreshold = visibleThreshold;
         }
@@ -65,30 +68,13 @@ public class MainActivity extends AppCompatActivity {
         public void onScroll(AbsListView view, int firstVisibleItem,
                              int visibleItemCount, int totalItemCount) {
 
-            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-                loading = true;
-                /* @todo Need to send correct offset and limits going forward */
-                new DataFetcherImpl().
-                        getQuestions(0,0,0,""). /* TODO(Deepak): add proper values */
-                        onBackpressureBuffer().
-                        subscribeOn(Schedulers.io()).
-                        observeOn(AndroidSchedulers.mainThread()).
-                        subscribe(new Subscriber<List<Question>>() {
-                            @Override
-                            public void onCompleted() {
-                                adapter.notifyDataSetChanged();
-                                loading = false;
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                            }
-
-                            @Override
-                            public void onNext(List<Question> questions) {
-                                populations.addAll(questions);
-                            }
-                        }); /* TODO(Deepak):  do we really need a new Subscriber each time ??  */
+            if ((totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+                mainFeedPresenter.update(new Action0() {
+                    @Override
+                    public void call() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
         }
 
@@ -96,31 +82,6 @@ public class MainActivity extends AppCompatActivity {
         public void onScrollStateChanged(AbsListView view, int scrollState) {
         }
     }
-
-    final Subscriber<List<Question>> questionSubscriber = new Subscriber<List<Question>>() {
-        @Override
-        public void onCompleted() {
-            Log.e("MainActivity", "before Dismiss");
-            listview = (ListView) findViewById(R.id.listview);
-            adapter = new QuestionViewAdapter(MainActivity.this, populations);
-            listview.setAdapter(adapter);
-            listview.setOnScrollListener(new EndlessScrollListener(4));
-            mProgressDialog.dismiss();
-            Log.e("MainActivity", "after Dismiss");
-
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            Log.e("MainActivity", "error" + e);
-            mProgressDialog.dismiss();
-        }
-
-        @Override
-        public void onNext(List<Question> questions) {
-            populations.addAll(questions);
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -131,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.slider_list);
 
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, menutitles));
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menutitles));
         mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -182,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 getActionBar().setTitle("title1");
                 invalidateOptionsMenu();
             }
+
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle("title2");
@@ -202,37 +164,44 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(intent);
             }
         });
-
-        new DataFetcherImpl().
-                getQuestions(0,0,0,"").onBackpressureBuffer().
-                subscribeOn(Schedulers.io()).
-                observeOn(AndroidSchedulers.mainThread()).
-                subscribe(questionSubscriber);
-
+        mainFeedPresenter.init(new Action0() {
+            @Override
+            public void call() {
+                Log.e("MainActivity", "before Dismiss");
+                listview = (ListView) findViewById(R.id.listview);
+                adapter = new QuestionViewAdapter(MainActivity.this, mainFeedPresenter);
+                listview.setAdapter(adapter);
+                listview.setOnScrollListener(new EndlessScrollListener(4));
+                mProgressDialog.dismiss();
+                Log.e("MainActivity", "after Dismiss");
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
-        if(getFragmentManager().getBackStackEntryCount() > 0) {
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         switch (item.getItemId()) {
-            case R.string.action_settings :
+            case R.string.action_settings:
                 return true;
-            default :
+            default:
                 return super.onOptionsItemSelected(item);
         }
     }
@@ -249,17 +218,11 @@ public class MainActivity extends AppCompatActivity {
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
     }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    protected void onDestroy() {
-        super.onDestroy();
-        if (questionSubscriber != null && !questionSubscriber.isUnsubscribed()) {
-            questionSubscriber.unsubscribe();
-        }
     }
 
 }

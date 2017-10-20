@@ -75,7 +75,7 @@ public class BookMarkFragment extends Fragment {
         listView =  (ListView) itemView.findViewById(R.id.fragment_bookmarked_questions);
 
         questions = (ArrayList<Question>) getArguments().getSerializable("data");
-        adapter = new QuestionViewAdapter(getActivity(), questions);
+        //adapter = new QuestionViewAdapter(getActivity(), questions);
         listView.setAdapter(adapter);
         listView.setOnScrollListener(new EndlessScrollListener(4));
         return itemView;

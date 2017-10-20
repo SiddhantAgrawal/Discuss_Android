@@ -20,7 +20,7 @@ import rx.Observable;
  */
 
 public class DataFetcherImpl implements DataFetcher {
-    private static final String SERVICE_ENDPOINT = "http://192.168.0.5:8070/";
+    private static final String SERVICE_ENDPOINT = "http://10.14.125.250:8070/";
 
     private static final DiscussService discussService = new Retrofit.Builder()
                 .baseUrl(DataFetcherImpl.SERVICE_ENDPOINT)
@@ -29,8 +29,8 @@ public class DataFetcherImpl implements DataFetcher {
                 .build().create(DiscussService.class);
 
     @Override
-    public Observable<List<Question>> getQuestions(int category, int offset, int limit, String userId) {
-        return discussService.getQuestions("questions/list?category=" + category + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+    public Observable<List<Question>> getQuestions(int offset, int limit, String userId) {
+        return discussService.getQuestions("questions/list?offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override

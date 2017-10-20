@@ -18,7 +18,7 @@ import java.util.List;
  */
 
 public interface DataFetcher {
-    Observable<List<Question>> getQuestions(final int category, final int offset, final int limit, final String userId);
+    Observable<List<Question>> getQuestions(final int offset, final int limit, final String userId);
 
     Observable<List<Comment>> getCommentsForQuestion(final int questionId, final int offset, final int limit, final String userId);
 

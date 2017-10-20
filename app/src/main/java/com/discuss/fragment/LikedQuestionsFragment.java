@@ -78,7 +78,7 @@ public class LikedQuestionsFragment extends Fragment {
 
         questions = (ArrayList<Question>) getArguments().getSerializable("data");
         Log.e("liked questions", questions.toString());
-        adapter = new QuestionViewAdapter(getActivity(), questions);
+       // adapter = new QuestionViewAdapter(getActivity(), questions);
         listView.setAdapter(adapter);
         listView.setOnScrollListener(new EndlessScrollListener(4));
         return itemView;
