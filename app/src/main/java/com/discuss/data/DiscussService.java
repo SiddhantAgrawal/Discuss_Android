@@ -5,6 +5,8 @@ import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
+import com.discuss.datatypes.User;
+import com.discuss.datatypes.UserCategoryPreference;
 
 import java.util.List;
 
@@ -42,6 +44,9 @@ public interface DiscussService {
 
     @GET
     Observable<Response<List<Category>>> getCategory(@Url final String pathParams);
+
+    @GET
+    Observable<Response<List<UserCategoryPreference>>> getUserCategoryPreference(@Url final String pathParams);
 
     @GET
     public boolean likeQuestion(@Url final String pathParams); /* @todo Make it PUT  */

@@ -20,6 +20,8 @@
         </activity>
         <activity android:name="com.discuss.views.AskQuestionView" >
         </activity>
+        <activity android:name="com.discuss.ui.category.CategorySelector" >
+        </activity>
     </application>
 
 </manifest>

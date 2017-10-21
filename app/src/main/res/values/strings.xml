@@ -14,9 +14,11 @@
     <string name="difficulty">"difficulty "</string>
     <string name="posted_by">"posted by "</string>
     <string name="choose_image">choose Image</string>
+    <string name="save">save</string>
     <string-array name="titles">
         <item>BookMarks</item>
         <item>Questions Liked</item>
-        <item>Comments added</item>
+        <item>Questions Commented</item>
+        <item>Categories</item>
     </string-array>
 </resources>

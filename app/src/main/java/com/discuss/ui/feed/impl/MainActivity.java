@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.discuss.datatypes.Question;
+import com.discuss.ui.category.CategorySelector;
 import com.discuss.ui.commented.impl.CommentedQuestionFragment;
 import com.discuss.ui.liked.impl.LikedQuestionsFragment;
 import com.discuss.ui.bookmark.impl.BookMarkFragment;
@@ -79,15 +80,24 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("Main", "commentedQ");
                         fragmentView = new CommentedQuestionFragment();
                         break;
+                    case 3:
+                        Log.e("Main", "category selection");
+                        fragmentView = new CategorySelector();
+                        mDrawerLayout.closeDrawer(mDrawerList);
+                        Intent intent = new Intent(MainActivity.this, CategorySelector.class);
+                        MainActivity.this.startActivity(intent);
                     default:
                         break;
                 }
-                final Fragment fragment = (Fragment) fragmentView;
-                fragmentView.init(() -> {
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.frame_container, fragment).addToBackStack(null).commit();
-                    mDrawerLayout.closeDrawer(mDrawerList);
-                });
+
+                if(fragmentView instanceof Fragment) {
+                    final Fragment fragment = (Fragment) fragmentView;
+                    fragmentView.init(() -> {
+                        FragmentManager fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.frame_container, fragment).addToBackStack(null).commit();
+                        mDrawerLayout.closeDrawer(mDrawerList);
+                    });
+                }
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

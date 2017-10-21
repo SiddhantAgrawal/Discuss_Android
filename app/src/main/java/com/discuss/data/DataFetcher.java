@@ -5,6 +5,7 @@ import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
+import com.discuss.datatypes.UserCategoryPreference;
 
 import retrofit2.http.GET;
 import retrofit2.http.Url;
@@ -33,6 +34,8 @@ public interface DataFetcher {
     Observable<Question> getQuestion(final String questionId, final String userId);
 
     Observable<List<Category>> getCategory();
+
+    Observable<List<UserCategoryPreference>> getUserCategoryPreference(final String userId);
 
     boolean likeQuestion(final String questionId, final String userId);
 

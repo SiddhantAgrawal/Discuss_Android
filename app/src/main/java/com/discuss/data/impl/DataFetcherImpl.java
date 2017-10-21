@@ -7,6 +7,7 @@ import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
 import com.discuss.data.DataFetcher;
+import com.discuss.datatypes.UserCategoryPreference;
 
 import java.util.List;
 
@@ -67,6 +68,11 @@ public class DataFetcherImpl implements DataFetcher {
     @Override
     public Observable<List<Category>> getCategory() {
         return discussService.getCategory("category/list").map(Response::getData);
+    }
+
+    @Override
+    public Observable<List<UserCategoryPreference>> getUserCategoryPreference(String userId) {
+        return discussService.getUserCategoryPreference("category/pref?userId=" + userId).map(Response::getData);
     }
 
     @Override
