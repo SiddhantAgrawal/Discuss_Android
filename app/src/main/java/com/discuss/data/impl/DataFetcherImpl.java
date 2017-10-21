@@ -1,11 +1,12 @@
-package com.discuss.fetcher.impl;
+package com.discuss.data.impl;
 
 
+import com.discuss.data.DiscussService;
 import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
-import com.discuss.fetcher.DataFetcher;
+import com.discuss.data.DataFetcher;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ import rx.Observable;
  */
 
 public class DataFetcherImpl implements DataFetcher {
-    private static final String SERVICE_ENDPOINT = "http://10.14.125.250:8070/";
+    private static final String SERVICE_ENDPOINT = "http://192.168.122.1:8070/";
 
     private static final DiscussService discussService = new Retrofit.Builder()
                 .baseUrl(DataFetcherImpl.SERVICE_ENDPOINT)
@@ -46,6 +47,11 @@ public class DataFetcherImpl implements DataFetcher {
     @Override
     public Observable<List<Question>> getLikedQuestions(int offset, int limit, String userId) {
         return discussService.getLikedQuestions("questions/liked?offset=" + offset + "&limit=" + limit).map(Response::getData);
+    }
+
+    @Override
+    public Observable<List<Question>> getCommentedQuestions(int offset, int limit, String userId) {
+        return discussService.getCommentedQuestions("questions/liked?offset=" + offset + "&limit=" + limit).map(Response::getData);
     }
 
     @Override

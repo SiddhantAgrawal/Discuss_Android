@@ -23,8 +23,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.discuss.datatypes.Category;
-import com.discuss.datatypes.Question;
-import com.discuss.fetcher.impl.DataFetcherImpl;
+import com.discuss.data.impl.DataFetcherImpl;
 import com.example.siddhantagrawal.check_discuss.R;
 
 import java.io.IOException;

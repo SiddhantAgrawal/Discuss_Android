@@ -10,13 +10,13 @@
         android:label="@string/app_name"
         android:theme="@style/Base.AppTheme"
         android:icon="@drawable/temp_img">
-        <activity android:name="com.discuss.ui.feed.MainActivity" >
+        <activity android:name="com.discuss.ui.feed.impl.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.discuss.views.QuestionView" >
+        <activity android:name="com.discuss.ui.question.view.QuestionView" >
         </activity>
         <activity android:name="com.discuss.views.AskQuestionView" >
         </activity>

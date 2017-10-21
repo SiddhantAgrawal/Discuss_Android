@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context="com.discuss.ui.feed.MainActivity">
+        tools:context="com.discuss.ui.feed.impl.MainActivity">
 
         &lt;!&ndash;    <android.support.design.widget.AppBarLayout
                 android:layout_width="match_parent"

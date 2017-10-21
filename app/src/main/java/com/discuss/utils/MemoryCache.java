@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.utils;
 
 /**
  * Created by siddhant.agrawal on 8/24/17.

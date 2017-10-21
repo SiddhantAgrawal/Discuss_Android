@@ -1,10 +1,10 @@
-package com.discuss.ui.feed.impl;
+package com.discuss.ui.liked.impl;
 
 import android.util.Log;
 
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
-import com.discuss.ui.feed.MainFeedPresenter;
+import com.discuss.ui.liked.LikedPresenter;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,7 +19,7 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
+public class LikedPresenterImpl implements LikedPresenter<Question> {
     private DataFetcherImpl dataFetcher;
     private List<Question> questions;
     private int limit;
@@ -35,7 +35,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
 
     private void setQuestionObservableAndSubscribeForFirstSubscriber() {
         questionObservable = dataFetcher.   /* hot observable */
-                getQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
+                getLikedQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
                 publish().
@@ -43,6 +43,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
                 observeOn(AndroidSchedulers.mainThread());
         questionObservable.subscribe(onNextQuestionsList, onError, (() -> {
             synchronized (lock) {
+                Log.e("lLLL", "finished loading");
                 isLoading = false;
             }
         }));
@@ -51,13 +52,16 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
     private final Action1<List<Question>> onNextQuestionsList = new Action1<List<Question>>() {
         @Override
         public void call(List<Question> fetchedQuestions) {
+            Log.e("MMM", "loading questions");
             questions.addAll(fetchedQuestions);
         }
     };
 
-    private final Action1<Throwable> onError = throwable -> {};
+    private final Action1<Throwable> onError = throwable -> {
+    };
 
-    private final Action0 onCompleted = () -> {};
+    private final Action0 onCompleted = () -> {
+    };
 
 
     @Override
@@ -74,16 +78,21 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading questions......", size() + " " + limit);
+                Log.e("liked questions......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
-            questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
+            questionObservable.subscribe((a) -> {
+                Log.e("NNN", "gggg");
+            }, (a) -> {
+                Log.e("FFF", a.toString());
+            }, onCompletedAction);
         }
     }
 
     @Override
     public Observable<Boolean> refresh() {
-        init(() -> {});
+        init(() -> {
+        });
         return Observable.just(true);
     }
 
@@ -92,9 +101,10 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         if (null != questions && questions.size() > position) {
             return Observable.just(questions.get(position));
         } else {
-            update(() -> {});
+            update(() -> {
+            });
             return dataFetcher.   /* cold observable */
-                    getQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
+                    getLikedQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
                     onBackpressureBuffer().
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).first().map(l -> l.get(0));
@@ -106,5 +116,4 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
     public int size() {
         return (null == questions) ? 0 : questions.size();
     }
-
 }

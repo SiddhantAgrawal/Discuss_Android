@@ -1,4 +1,4 @@
-package com.discuss.fetcher.impl;
+package com.discuss.data;
 
 
 import com.discuss.datatypes.Category;
@@ -17,7 +17,7 @@ import rx.Observable;
  * @author Deepak Thakur
  *
  */
-interface DiscussService {
+public interface DiscussService {
 
     @GET
     Observable<Response<List<Question>>> getQuestions(@Url final String pathParams);
@@ -30,6 +30,9 @@ interface DiscussService {
 
     @GET
     Observable<Response<List<Question>>> getLikedQuestions(@Url final String pathParams);
+
+    @GET
+    Observable<Response<List<Question>>> getCommentedQuestions(@Url final String pathParams);
 
     @GET
     Observable<Response<List<Comment>>> getUserAddedComments(@Url final String pathParams);

@@ -1,10 +1,10 @@
-package com.discuss.ui.feed.impl;
+package com.discuss.ui.bookmark.impl;
 
 import android.util.Log;
 
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
-import com.discuss.ui.feed.MainFeedPresenter;
+import com.discuss.ui.bookmark.BookMarkPresenter;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,7 +19,7 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
+public class BookMarkPresenterImpl implements BookMarkPresenter<Question> {
     private DataFetcherImpl dataFetcher;
     private List<Question> questions;
     private int limit;
@@ -27,6 +27,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
     private Observable<List<Question>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
+    public BookMarkPresenterImpl() {}
     private void checkPreConditions() {
         if (null == dataFetcher || null == questions) {
             init(onCompleted);
@@ -35,7 +36,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
 
     private void setQuestionObservableAndSubscribeForFirstSubscriber() {
         questionObservable = dataFetcher.   /* hot observable */
-                getQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
+                getBookMarkedQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
                 publish().
@@ -74,7 +75,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading questions......", size() + " " + limit);
+                Log.e("Loading bookmarked question......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
             questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
@@ -94,7 +95,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         } else {
             update(() -> {});
             return dataFetcher.   /* cold observable */
-                    getQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
+                    getBookMarkedQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
                     onBackpressureBuffer().
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).first().map(l -> l.get(0));

@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.utils;
 
 import java.io.InputStream;
 import java.io.OutputStream;

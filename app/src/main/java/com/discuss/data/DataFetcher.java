@@ -1,4 +1,4 @@
-package com.discuss.fetcher;
+package com.discuss.data;
 
 
 import com.discuss.datatypes.Category;
@@ -25,6 +25,8 @@ public interface DataFetcher {
     Observable<List<Question>> getBookMarkedQuestions(final int offset, final int limit, final String userId);
 
     Observable<List<Question>> getLikedQuestions(final int offset, final int limit, final String userId);
+
+    Observable<List<Question>> getCommentedQuestions(final int offset, final int limit, final String userId);
 
     Observable<List<Comment>> getUserAddedComments(final int offset, final int limit, final String userId);
 

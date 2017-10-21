@@ -1,10 +1,11 @@
-package com.discuss.ui.feed.impl;
+package com.discuss.ui.commented.impl;
+
 
 import android.util.Log;
 
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
-import com.discuss.ui.feed.MainFeedPresenter;
+import com.discuss.ui.commented.CommentedPresenter;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,7 +20,7 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
+public class CommentedPresenterImpl implements CommentedPresenter<Question> {
     private DataFetcherImpl dataFetcher;
     private List<Question> questions;
     private int limit;
@@ -35,7 +36,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
 
     private void setQuestionObservableAndSubscribeForFirstSubscriber() {
         questionObservable = dataFetcher.   /* hot observable */
-                getQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
+                getCommentedQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
                 publish().
@@ -55,9 +56,11 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         }
     };
 
-    private final Action1<Throwable> onError = throwable -> {};
+    private final Action1<Throwable> onError = throwable -> {
+    };
 
-    private final Action0 onCompleted = () -> {};
+    private final Action0 onCompleted = () -> {
+    };
 
 
     @Override
@@ -74,16 +77,19 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading questions......", size() + " " + limit);
+                Log.e("Loading comments......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
-            questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
+            questionObservable.subscribe((a) -> {
+            }, (a) -> {
+            }, onCompletedAction);
         }
     }
 
     @Override
     public Observable<Boolean> refresh() {
-        init(() -> {});
+        init(() -> {
+        });
         return Observable.just(true);
     }
 
@@ -92,9 +98,10 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         if (null != questions && questions.size() > position) {
             return Observable.just(questions.get(position));
         } else {
-            update(() -> {});
+            update(() -> {
+            });
             return dataFetcher.   /* cold observable */
-                    getQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
+                    getCommentedQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
                     onBackpressureBuffer().
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).first().map(l -> l.get(0));
@@ -106,5 +113,4 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
     public int size() {
         return (null == questions) ? 0 : questions.size();
     }
-
 }

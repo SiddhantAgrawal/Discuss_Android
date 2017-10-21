@@ -1,4 +1,4 @@
-package com.example.siddhantagrawal.check_discuss;
+package com.discuss.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +19,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
+
+import com.example.siddhantagrawal.check_discuss.R;
 
 /**
  * @author Siddhant Agrawal
