@@ -1,42 +1,31 @@
 package com.discuss.ui.category;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.discuss.datatypes.Question;
-import com.discuss.datatypes.User;
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.UserCategoryPreference;
 import com.discuss.ui.View;
-import com.discuss.ui.bookmark.BookMarkPresenter;
-import com.discuss.ui.bookmark.impl.BookMarkFragment;
-import com.discuss.ui.bookmark.impl.BookMarkPresenterImpl;
-import com.discuss.ui.feed.impl.MainActivity;
-import com.discuss.ui.question.view.QuestionView;
-import com.discuss.utils.EndlessScrollListener;
-import com.discuss.views.AskQuestionView;
 import com.example.siddhantagrawal.check_discuss.R;
+
+import javax.inject.Inject;
 
 import rx.functions.Action0;
 
 
 public class CategorySelector extends AppCompatActivity implements View {
-    private CategorySelectorPresenter<UserCategoryPreference> categorySelectorPresenter;
+
+    @Inject
+    public CategorySelectorPresenter categorySelectorPresenter;
     CategorySelectorAdapter adapter;
 
     @Override
@@ -54,9 +43,9 @@ public class CategorySelector extends AppCompatActivity implements View {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DiscussApplication) getApplication()).getMainComponent().inject(this);
         setTitle("Categories");
         setContentView(R.layout.tag_list);
-        categorySelectorPresenter = new CategorySelectorPresenterImpl();
         categorySelectorPresenter.init(new Action0() {
             @Override
             public void call() {
@@ -81,9 +70,9 @@ public class CategorySelector extends AppCompatActivity implements View {
 
         // Declare Variables
         private Context context;
-        private CategorySelectorPresenter<UserCategoryPreference> categorySelectorPresenter;
+        private CategorySelectorPresenter categorySelectorPresenter;
 
-        public CategorySelectorAdapter(Context context, CategorySelectorPresenter<UserCategoryPreference> categorySelectorPresenter) {
+        public CategorySelectorAdapter(Context context, CategorySelectorPresenter categorySelectorPresenter) {
             this.context = context;
             this.categorySelectorPresenter = categorySelectorPresenter;
         }

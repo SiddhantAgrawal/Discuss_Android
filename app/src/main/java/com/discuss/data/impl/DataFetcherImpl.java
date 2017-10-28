@@ -11,6 +11,8 @@ import com.discuss.datatypes.UserCategoryPreference;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -18,17 +20,19 @@ import rx.Observable;
 
 /**
  * @author Deepak Thakur
- *
  */
 
 public class DataFetcherImpl implements DataFetcher {
-    private static final String SERVICE_ENDPOINT = "http://192.168.122.1:8070/";
+    private final DiscussService discussService;
 
-    private static final DiscussService discussService = new Retrofit.Builder()
-                .baseUrl(DataFetcherImpl.SERVICE_ENDPOINT)
+    @Inject
+    public DataFetcherImpl(final String endpoint) {
+        discussService = new Retrofit.Builder()
+                .baseUrl(endpoint)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build().create(DiscussService.class);
+    }
 
     @Override
     public Observable<List<Question>> getQuestions(int offset, int limit, String userId) {
@@ -42,7 +46,7 @@ public class DataFetcherImpl implements DataFetcher {
 
     @Override
     public Observable<List<Question>> getBookMarkedQuestions(int offset, int limit, String userId) {
-        return discussService.getBookMarkedQuestions("user/bookmarked/questions?offset="+ offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+        return discussService.getBookMarkedQuestions("user/bookmarked/questions?offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class DataFetcherImpl implements DataFetcher {
 
     @Override
     public Observable<List<Comment>> getUserAddedComments(int offset, int limit, String userId) {
-        return discussService.getUserAddedComments("user/comments?offset="+ offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+        return discussService.getUserAddedComments("user/comments?offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
     }
 
     @Override

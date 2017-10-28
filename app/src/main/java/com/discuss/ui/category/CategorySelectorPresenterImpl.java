@@ -2,6 +2,7 @@ package com.discuss.ui.category;
 
 import android.util.Log;
 
+import com.discuss.data.DataFetcher;
 import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Question;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.inject.Inject;
+
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -19,15 +22,19 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 
-public class CategorySelectorPresenterImpl implements CategorySelectorPresenter<UserCategoryPreference> {
-    private DataFetcherImpl dataFetcher;
+public class CategorySelectorPresenterImpl implements CategorySelectorPresenter {
+    private final DataFetcher dataFetcher;
     private List<UserCategoryPreference> userCategoryPreferences;
     private int limit;
     private volatile boolean isLoading;
     private Observable<List<UserCategoryPreference>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
-    public CategorySelectorPresenterImpl() {}
+    @Inject
+    public CategorySelectorPresenterImpl(DataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
+    }
+
     private void checkPreConditions() {
         if (null == dataFetcher || null == userCategoryPreferences) {
             init(onCompleted);
@@ -63,7 +70,6 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter<
 
     @Override
     public void init(Action0 onCompletedAction) {
-        dataFetcher = new DataFetcherImpl();
         userCategoryPreferences = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         synchronized (lock) {

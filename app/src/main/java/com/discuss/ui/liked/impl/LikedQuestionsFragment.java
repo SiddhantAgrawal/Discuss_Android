@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import android.widget.ListView;
 
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.feed.impl.MainActivity;
 import com.discuss.ui.liked.LikedPresenter;
@@ -25,14 +26,17 @@ import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 import rx.functions.Action0;
 
 public class LikedQuestionsFragment extends Fragment implements com.discuss.ui.View {
 
-    final private LikedPresenter<Question> likedPresenter;
+    @Inject
+    LikedPresenter likedPresenter;
 
+    @Inject
     public LikedQuestionsFragment() {
-        likedPresenter = new LikedPresenterImpl();
     }
 
     @Override
@@ -51,6 +55,7 @@ public class LikedQuestionsFragment extends Fragment implements com.discuss.ui.V
     @SuppressWarnings(value = "unchecked")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((DiscussApplication) getActivity().getApplication()).getMainComponent().inject(this);
         View itemView = inflater.inflate(R.layout.fragment_liked_questions, container, false);
         ListView listView = (ListView) itemView.findViewById(R.id.fragment_liked_questions);
 
@@ -65,9 +70,9 @@ public class LikedQuestionsFragment extends Fragment implements com.discuss.ui.V
 
         // Declare Variables
         private Context context;
-        private LikedPresenter<Question> likedPresenter;
+        private LikedPresenter likedPresenter;
 
-        public QuestionViewAdapter(Context context, LikedPresenter<Question> likedPresenter) {
+        public QuestionViewAdapter(Context context, LikedPresenter likedPresenter) {
             this.context = context;
             this.likedPresenter = likedPresenter;
         }
@@ -114,7 +119,6 @@ public class LikedQuestionsFragment extends Fragment implements com.discuss.ui.V
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                        Log.e("user has liked :- ", String.valueOf(question.isLiked()));
                         if (question.isLiked()) {
                             imageView.setImageDrawable(ContextCompat.getDrawable(LikedQuestionsFragment.QuestionViewAdapter.this.context, R.drawable.like_icon));
                             if(questionOrigionallyLiked)

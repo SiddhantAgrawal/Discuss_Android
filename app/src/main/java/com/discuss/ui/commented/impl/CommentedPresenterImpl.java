@@ -3,6 +3,7 @@ package com.discuss.ui.commented.impl;
 
 import android.util.Log;
 
+import com.discuss.data.DataFetcher;
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.commented.CommentedPresenter;
@@ -10,6 +11,8 @@ import com.discuss.ui.commented.CommentedPresenter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -20,13 +23,18 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class CommentedPresenterImpl implements CommentedPresenter<Question> {
-    private DataFetcherImpl dataFetcher;
+public class CommentedPresenterImpl implements CommentedPresenter {
+    private final DataFetcher dataFetcher;
     private List<Question> questions;
     private int limit;
     private volatile boolean isLoading;
     private Observable<List<Question>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
+
+    @Inject
+    public CommentedPresenterImpl(DataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
+    }
 
     private void checkPreConditions() {
         if (null == dataFetcher || null == questions) {
@@ -65,7 +73,6 @@ public class CommentedPresenterImpl implements CommentedPresenter<Question> {
 
     @Override
     public void init(Action0 onCompletedAction) {
-        dataFetcher = new DataFetcherImpl();
         questions = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         update(onCompletedAction);
@@ -77,7 +84,6 @@ public class CommentedPresenterImpl implements CommentedPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading comments......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
             questionObservable.subscribe((a) -> {

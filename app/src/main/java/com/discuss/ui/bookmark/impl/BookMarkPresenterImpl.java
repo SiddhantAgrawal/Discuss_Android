@@ -2,6 +2,7 @@ package com.discuss.ui.bookmark.impl;
 
 import android.util.Log;
 
+import com.discuss.data.DataFetcher;
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.bookmark.BookMarkPresenter;
@@ -9,6 +10,8 @@ import com.discuss.ui.bookmark.BookMarkPresenter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -19,15 +22,19 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class BookMarkPresenterImpl implements BookMarkPresenter<Question> {
-    private DataFetcherImpl dataFetcher;
+public class BookMarkPresenterImpl implements BookMarkPresenter {
+    private final DataFetcher dataFetcher;
     private List<Question> questions;
     private int limit;
     private volatile boolean isLoading;
     private Observable<List<Question>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
-    public BookMarkPresenterImpl() {}
+    @Inject
+    public BookMarkPresenterImpl(DataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
+    }
+
     private void checkPreConditions() {
         if (null == dataFetcher || null == questions) {
             init(onCompleted);
@@ -63,7 +70,6 @@ public class BookMarkPresenterImpl implements BookMarkPresenter<Question> {
 
     @Override
     public void init(Action0 onCompletedAction) {
-        dataFetcher = new DataFetcherImpl();
         questions = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         update(onCompletedAction);
@@ -75,7 +81,6 @@ public class BookMarkPresenterImpl implements BookMarkPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading bookmarked question......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
             questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);

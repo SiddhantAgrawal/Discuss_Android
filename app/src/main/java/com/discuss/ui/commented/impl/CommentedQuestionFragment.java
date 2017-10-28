@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import android.widget.ListView;
 
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.commented.CommentedPresenter;
 import com.discuss.ui.feed.impl.MainActivity;
@@ -26,13 +27,17 @@ import com.example.siddhantagrawal.check_discuss.R;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 import rx.functions.Action0;
 
 public class CommentedQuestionFragment extends Fragment implements com.discuss.ui.View {
-    final private CommentedPresenter<Question> commentedPresenter;
 
+    @Inject
+    public CommentedPresenter commentedPresenter;
+
+    @Inject
     public CommentedQuestionFragment() {
-        commentedPresenter = new CommentedPresenterImpl();
     }
 
     @Override
@@ -52,6 +57,8 @@ public class CommentedQuestionFragment extends Fragment implements com.discuss.u
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //getActivity().setTitle("Answered");
+        ((DiscussApplication) getActivity().getApplication()).getMainComponent().inject(this);
+
         View itemView = inflater.inflate(R.layout.fragment_liked_questions, container, false);
         ListView listView = (ListView) itemView.findViewById(R.id.fragment_liked_questions);
 
@@ -66,9 +73,9 @@ public class CommentedQuestionFragment extends Fragment implements com.discuss.u
 
         // Declare Variables
         private Context context;
-        private CommentedPresenter<Question> commentedPresenter;
+        private CommentedPresenter commentedPresenter;
 
-        public QuestionViewAdapter(Context context, CommentedPresenter<Question> commentedPresenter) {
+        public QuestionViewAdapter(Context context, CommentedPresenter commentedPresenter) {
             this.context = context;
             this.commentedPresenter = commentedPresenter;
         }

@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.bookmark.BookMarkPresenter;
 import com.discuss.ui.feed.impl.MainActivity;
@@ -24,20 +25,28 @@ import com.discuss.utils.EndlessScrollListener;
 import com.discuss.ui.question.view.QuestionView;
 import com.example.siddhantagrawal.check_discuss.R;
 
+import javax.inject.Inject;
+
 import rx.functions.Action0;
 
 public class BookMarkFragment extends Fragment implements com.discuss.ui.View {
 
-    final private BookMarkPresenter<Question> bookMarkPresenter;
+    @Inject
+    BookMarkPresenter bookMarkPresenter;
     QuestionViewAdapter adapter;
-    public BookMarkFragment() {
-        bookMarkPresenter = new BookMarkPresenterImpl();
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
     }
 
     @Override
     public void onResume(){
         super.onResume();
         ((MainActivity)getActivity()).setActionBarTitle("BookMarked");
+    }
+    @Inject
+    public BookMarkFragment() {
     }
 
     @Override
@@ -48,6 +57,7 @@ public class BookMarkFragment extends Fragment implements com.discuss.ui.View {
     @SuppressWarnings(value = "unchecked")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((DiscussApplication) getActivity().getApplication()).getMainComponent().inject(this);
         View itemView = inflater.inflate(R.layout.fragment_bookmarked_questions, container, false);
         ListView listView = (ListView) itemView.findViewById(R.id.fragment_bookmarked_questions);
         adapter = new QuestionViewAdapter(getActivity(), bookMarkPresenter);
@@ -61,9 +71,9 @@ public class BookMarkFragment extends Fragment implements com.discuss.ui.View {
 
         // Declare Variables
         private Context context;
-        private BookMarkPresenter<Question> bookMarkPresenter;
+        private BookMarkPresenter bookMarkPresenter;
 
-        public QuestionViewAdapter(Context context, BookMarkPresenter<Question> bookMarkPresenter) {
+        public QuestionViewAdapter(Context context, BookMarkPresenter bookMarkPresenter) {
             this.context = context;
             this.bookMarkPresenter = bookMarkPresenter;
         }
@@ -110,7 +120,6 @@ public class BookMarkFragment extends Fragment implements com.discuss.ui.View {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                        Log.e("user has liked :- ", String.valueOf(question.isLiked()));
                         if (question.isLiked()) {
                             imageView.setImageDrawable(ContextCompat.getDrawable(BookMarkFragment.QuestionViewAdapter.this.context, R.drawable.like_icon));
                             if(questionOrigionallyLiked)

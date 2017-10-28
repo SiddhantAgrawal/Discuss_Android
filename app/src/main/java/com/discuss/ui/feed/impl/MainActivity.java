@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.category.CategorySelector;
 import com.discuss.ui.commented.impl.CommentedQuestionFragment;
@@ -34,9 +35,11 @@ import com.discuss.ui.liked.impl.LikedQuestionsFragment;
 import com.discuss.ui.bookmark.impl.BookMarkFragment;
 import com.discuss.ui.feed.MainFeedPresenter;
 import com.discuss.utils.EndlessScrollListener;
-import com.discuss.views.AskQuestionView;
+import com.discuss.ui.question.post.impl.AskQuestionView;
 import com.discuss.ui.question.view.QuestionView;
 import com.example.siddhantagrawal.check_discuss.R;
+
+import javax.inject.Inject;
 
 /**
  * @author siddhant.agrawal
@@ -50,12 +53,20 @@ public class MainActivity extends AppCompatActivity {
     ActionBarDrawerToggle mDrawerToggle;
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
-    MainFeedPresenter<Question> mainFeedPresenter = new MainFeedPresenterImpl();
+
+    @Inject
+    public MainFeedPresenter mainFeedPresenter;
+    @Inject
+    public BookMarkFragment bookMarkFragment;
+    @Inject
+    public LikedQuestionsFragment likedQuestionsFragment;
+    @Inject
+    public CommentedQuestionFragment commentedQuestionFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+        ((DiscussApplication) getApplication()).getMainComponent().inject(this);
         setContentView(R.layout.main_activity);
         setTitle("Question Feed");
         String[] menutitles = getResources().getStringArray(R.array.titles);
@@ -69,20 +80,15 @@ public class MainActivity extends AppCompatActivity {
                 com.discuss.ui.View fragmentView = null;
                 switch (position) {
                     case 0:
-                        Log.e("Main", "bookmarkedQ");
-                        fragmentView = new BookMarkFragment();
+                        fragmentView = bookMarkFragment;
                         break;
                     case 1:
-                        Log.e("Main", "likedQ");
-                        fragmentView = new LikedQuestionsFragment();
+                        fragmentView = likedQuestionsFragment;
                         break;
                     case 2:
-                        Log.e("Main", "commentedQ");
-                        fragmentView = new CommentedQuestionFragment();
+                        fragmentView = commentedQuestionFragment;
                         break;
                     case 3:
-                        Log.e("Main", "category selection");
-                        fragmentView = new CategorySelector();
                         mDrawerLayout.closeDrawer(mDrawerList);
                         Intent intent = new Intent(MainActivity.this, CategorySelector.class);
                         MainActivity.this.startActivity(intent);
@@ -196,9 +202,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Declare Variables
         private Context context;
-        private MainFeedPresenter<Question> mainFeedPresenter;
+        private MainFeedPresenter mainFeedPresenter;
 
-        public QuestionViewAdapter(Context context, MainFeedPresenter<Question> mainFeedPresenter) {
+        public QuestionViewAdapter(Context context, MainFeedPresenter mainFeedPresenter) {
             this.context = context;
             this.mainFeedPresenter = mainFeedPresenter;
         }
@@ -245,7 +251,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                        Log.e("user has liked :- ", String.valueOf(question.isLiked()));
                         if (question.isLiked()) {
                             imageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.like_icon));
                             if (questionOrigionallyLiked)

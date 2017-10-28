@@ -14,11 +14,13 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
-import com.discuss.ui.question.view.impl.QuestionViewPresenterImpl;
 import com.discuss.utils.EndlessScrollListener;
 import com.example.siddhantagrawal.check_discuss.R;
+
+import javax.inject.Inject;
 
 import rx.functions.Action0;
 
@@ -28,15 +30,17 @@ import rx.functions.Action0;
  */
 public class QuestionView extends Activity {
     CommentViewAdapter adapter;
-    QuestionViewPresenter questionViewPresenter;
     private ProgressDialog mProgressDialog;
+
+    @Inject
+    QuestionViewPresenter questionViewPresenter;
 
     @SuppressLint("SetTextI18n")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DiscussApplication) getApplication()).getMainComponent().inject(this);
         setContentView(R.layout.question);
-        questionViewPresenter = new QuestionViewPresenterImpl();
         mProgressDialog = new ProgressDialog(QuestionView.this);
         mProgressDialog.setTitle("see question");
         mProgressDialog.setMessage("loading... thanks for your patience");

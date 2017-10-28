@@ -2,6 +2,7 @@ package com.discuss.ui.liked.impl;
 
 import android.util.Log;
 
+import com.discuss.data.DataFetcher;
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.liked.LikedPresenter;
@@ -9,6 +10,8 @@ import com.discuss.ui.liked.LikedPresenter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -19,14 +22,18 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class LikedPresenterImpl implements LikedPresenter<Question> {
-    private DataFetcherImpl dataFetcher;
+public class LikedPresenterImpl implements LikedPresenter {
+    private final DataFetcher dataFetcher;
     private List<Question> questions;
     private int limit;
     private volatile boolean isLoading;
     private Observable<List<Question>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
+    @Inject
+    public LikedPresenterImpl(DataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
+    }
     private void checkPreConditions() {
         if (null == dataFetcher || null == questions) {
             init(onCompleted);
@@ -43,7 +50,6 @@ public class LikedPresenterImpl implements LikedPresenter<Question> {
                 observeOn(AndroidSchedulers.mainThread());
         questionObservable.subscribe(onNextQuestionsList, onError, (() -> {
             synchronized (lock) {
-                Log.e("lLLL", "finished loading");
                 isLoading = false;
             }
         }));
@@ -52,7 +58,6 @@ public class LikedPresenterImpl implements LikedPresenter<Question> {
     private final Action1<List<Question>> onNextQuestionsList = new Action1<List<Question>>() {
         @Override
         public void call(List<Question> fetchedQuestions) {
-            Log.e("MMM", "loading questions");
             questions.addAll(fetchedQuestions);
         }
     };
@@ -66,7 +71,6 @@ public class LikedPresenterImpl implements LikedPresenter<Question> {
 
     @Override
     public void init(Action0 onCompletedAction) {
-        dataFetcher = new DataFetcherImpl();
         questions = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         update(onCompletedAction);
@@ -78,14 +82,9 @@ public class LikedPresenterImpl implements LikedPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("liked questions......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
-            questionObservable.subscribe((a) -> {
-                Log.e("NNN", "gggg");
-            }, (a) -> {
-                Log.e("FFF", a.toString());
-            }, onCompletedAction);
+            questionObservable.subscribe((a) -> {}, (a) -> {}, onCompletedAction);
         }
     }
 

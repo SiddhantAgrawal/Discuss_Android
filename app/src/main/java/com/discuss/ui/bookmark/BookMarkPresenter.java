@@ -1,6 +1,8 @@
 package com.discuss.ui.bookmark;
 
 
+import com.discuss.datatypes.Question;
+
 import java.io.Serializable;
 
 import rx.Observable;
@@ -14,10 +16,10 @@ import rx.functions.Action0;
  *
  */
 
-public interface BookMarkPresenter<T extends Serializable> {
+public interface BookMarkPresenter {
     void init(Action0 onCompletedAction);
     void update(Action0 onCompletedAction);
     Observable<Boolean> refresh();
-    Observable<T> get(int position);
+    Observable<Question> get(int position);
     int size();
 }

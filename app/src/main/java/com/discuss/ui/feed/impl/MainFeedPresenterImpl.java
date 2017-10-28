@@ -2,6 +2,7 @@ package com.discuss.ui.feed.impl;
 
 import android.util.Log;
 
+import com.discuss.data.DataFetcher;
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.feed.MainFeedPresenter;
@@ -9,6 +10,8 @@ import com.discuss.ui.feed.MainFeedPresenter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -19,14 +22,18 @@ import rx.schedulers.Schedulers;
 /**
  * @author Deepak Thakur
  */
-public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
-    private DataFetcherImpl dataFetcher;
+public class MainFeedPresenterImpl implements MainFeedPresenter {
+    private final DataFetcher dataFetcher;
     private List<Question> questions;
     private int limit;
     private volatile boolean isLoading;
     private Observable<List<Question>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
+    @Inject
+    public MainFeedPresenterImpl(DataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
+    }
     private void checkPreConditions() {
         if (null == dataFetcher || null == questions) {
             init(onCompleted);
@@ -62,7 +69,6 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
 
     @Override
     public void init(Action0 onCompletedAction) {
-        dataFetcher = new DataFetcherImpl();
         questions = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         update(onCompletedAction);
@@ -74,7 +80,6 @@ public class MainFeedPresenterImpl implements MainFeedPresenter<Question> {
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading questions......", size() + " " + limit);
                 setQuestionObservableAndSubscribeForFirstSubscriber();
             }
             questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);

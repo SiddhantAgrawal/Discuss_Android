@@ -1,5 +1,7 @@
 package com.discuss.ui.feed;
 
+import com.discuss.datatypes.Question;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,10 +16,10 @@ import rx.functions.Action0;
  *
  */
 
-public interface MainFeedPresenter<T extends Serializable> {
+public interface MainFeedPresenter {
     void init(Action0 onCompletedAction);
     void update(Action0 onCompletedAction);
     Observable<Boolean> refresh();
-    Observable<T> get(int position);
+    Observable<Question> get(int position);
     int size();
 }

@@ -1,4 +1,4 @@
-package com.discuss.views;
+package com.discuss.ui.question.post.impl;
 
 import android.Manifest;
 import android.app.Activity;
@@ -22,72 +22,63 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Category;
 import com.discuss.data.impl.DataFetcherImpl;
+import com.discuss.ui.question.post.QuestionPostPresenter;
 import com.example.siddhantagrawal.check_discuss.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import javax.inject.Inject;
+
+import rx.Observable;
+
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.FuncN;
 
 public class AskQuestionView extends AppCompatActivity {
 
     static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     static final int GALARY_CAPTURE_IMAGE_REQUEST_CODE = 200;
 
-    private Bitmap imageToUpload;
-
+    private volatile Bitmap imageToUpload;
+    Spinner dropdownSpinner;
+    @Inject
+    QuestionPostPresenter questionPostPresenter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DiscussApplication) getApplication()).getMainComponent().inject(this);
         setContentView(R.layout.ask_question);
         FloatingActionButton addQuestion = (FloatingActionButton) findViewById(R.id.ask_question_add);
         Button addImageButton = (Button) findViewById(R.id.ask_question_choose_image);
-        addImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectImage();
-            }
-        });
-
-        List<Category> categoryList = new ArrayList<>();
-        final Spinner drowdown = (Spinner) findViewById(R.id.ask_question_tag_button);
-        new DataFetcherImpl().getCategory(). onBackpressureBuffer().
-                subscribeOn(Schedulers.io()).
-                observeOn(AndroidSchedulers.mainThread()).
-                subscribe(new Subscriber<List<Category>>() {
-                    @Override
-                    public void onCompleted() {
-                        drowdown.setAdapter(new ArrayAdapter<Category>(AskQuestionView.this, android.R.layout.simple_list_item_1, categoryList));
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onNext(List<Category> categories) {
-                        categoryList.addAll(categories);
-                    }
+        questionPostPresenter.
+                getCategories().
+                first().
+                doOnNext(categories -> {
+                    final Spinner categoryDropDown = (Spinner) findViewById(R.id.ask_question_tag_button);
+                    categoryDropDown.setAdapter(new ArrayAdapter<Category>(AskQuestionView.this, android.R.layout.simple_list_item_1, categories));
+                    addImageButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            selectImage();
+                        }
+                    });
+                    addQuestion.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (imageToUpload != null)
+                            Toast.makeText(AskQuestionView.this, "your question has been added successfully for the category : " + dropdownSpinner.getSelectedItem().toString(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
                 });
-
-
-        addQuestion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e("category is ", drowdown.getSelectedItem().toString());
-                if(imageToUpload != null)
-                Log.e("category is ", imageToUpload.toString());
-                Toast.makeText(AskQuestionView.this, "your question has been added successfully for the category : " + drowdown.getSelectedItem().toString(),
-                        Toast.LENGTH_LONG).show();
-            }
-        });
-
-
     }
 
     void selectImage() {

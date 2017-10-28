@@ -11,9 +11,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        jackOptions {
+       /* jackOptions {
             enabled true
-        }
+        }*/
     }
     buildTypes {
         release {
@@ -22,10 +22,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility 1.8
+/*        sourceCompatibility 1.8
         targetCompatibility 1.8
-        incremental = false
+        incremental = false*/
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
+
 
     packagingOptions {
         exclude 'META-INF/*'
@@ -36,7 +39,8 @@ dependencies {
     compile files('libs/discuss.jar')
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.android.support',  module: 'support-annotations';
+        exclude group: 'com.google.code.findbugs'
     })
     compile 'com.android.support:appcompat-v7:26.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
@@ -47,5 +51,11 @@ dependencies {
     compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.0.0'
     compile 'com.android.support:design:26.0.0'
+
+    compile 'com.google.dagger:dagger-android:2.11'
+    compile 'com.google.dagger:dagger-android-support:2.11' // if you use the support libraries
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.11'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
     // testCompile 'junit:junit:4.12'
+    compile 'javax.annotation:javax.annotation-api:1.2'
 }

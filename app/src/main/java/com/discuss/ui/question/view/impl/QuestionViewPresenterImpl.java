@@ -3,6 +3,7 @@ package com.discuss.ui.question.view.impl;
 
 import android.util.Log;
 
+import com.discuss.data.DataFetcher;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.data.impl.DataFetcherImpl;
@@ -11,6 +12,8 @@ import com.discuss.ui.question.view.QuestionViewPresenter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -21,13 +24,17 @@ import rx.schedulers.Schedulers;
 public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>{
 
     private Question question = null;
-    private DataFetcherImpl dataFetcher;
+    private final DataFetcher dataFetcher;
     private List<Comment> comments;
     private int limit;
     private volatile boolean isLoading = false;
     private Observable<List<Comment>> commentsObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
+    @Inject
+    public QuestionViewPresenterImpl(DataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
+    }
     private void checkPreConditions() {
         if (null == dataFetcher || null == comments) {
             init(onCompleted, question);
@@ -65,7 +72,6 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>
     @Override
     public void init(Action0 onCompletedAction, Question question) {
         this.question = question;
-        dataFetcher = new DataFetcherImpl();
         comments = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         update(onCompletedAction);
@@ -77,7 +83,6 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>
         synchronized (lock) {
             if (!isLoading) {
                 isLoading = true;
-                Log.e("Loading commented questions......", size() + " " + limit);
                 setCommentsObservableAndSubscribeForFirstSubscriber();
             }
             commentsObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
