@@ -18,8 +18,8 @@ import java.util.List;
  *
  */
 
-public interface DataFetcher {
-    Observable<List<Question>> getQuestions(final int offset, final int limit, final String userId);
+public interface DataRetriever {
+    Observable<List<Question>> getQuestions(final int offset, final int limit, final int userId, final String sortBy, final String sortOrder);
 
     Observable<List<Comment>> getCommentsForQuestion(final int questionId, final int offset, final int limit, final String userId);
 
@@ -31,16 +31,10 @@ public interface DataFetcher {
 
     Observable<List<Comment>> getUserAddedComments(final int offset, final int limit, final String userId);
 
-    Observable<Question> getQuestion(final String questionId, final String userId);
+    Observable<Question> getQuestion(final int questionId, final int userId);
 
     Observable<List<Category>> getCategory();
 
     Observable<List<UserCategoryPreference>> getUserCategoryPreference(final String userId);
-
-    boolean likeQuestion(final String questionId, final String userId);
-
-    boolean likeComment( final String questionId, final String userId);
-
-    boolean bookmarkQuestion( final String questionId, final String userId);
 
 }

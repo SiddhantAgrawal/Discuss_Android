@@ -1,20 +1,14 @@
 package com.discuss.ui.question.post.impl;
 
-import android.widget.ArrayAdapter;
-
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.datatypes.Category;
-import com.discuss.datatypes.Question;
 import com.discuss.ui.question.post.QuestionPostPresenter;
-import com.discuss.ui.question.view.QuestionViewPresenter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
@@ -24,10 +18,10 @@ import rx.schedulers.Schedulers;
  */
 public class QuestionPostPresenterImpl implements QuestionPostPresenter {
 
-    private DataFetcher dataFetcher;
+    private DataRetriever dataRetriever;
     @Inject
-    public QuestionPostPresenterImpl(DataFetcher dataFetcher) {
-        this.dataFetcher = dataFetcher;
+    public QuestionPostPresenterImpl(DataRetriever dataRetriever) {
+        this.dataRetriever = dataRetriever;
     }
 
     @Override
@@ -37,7 +31,7 @@ public class QuestionPostPresenterImpl implements QuestionPostPresenter {
 
     @Override
     public Observable<List<Category>> getCategories() {
-        return dataFetcher.getCategory().onBackpressureBuffer().
+        return dataRetriever.getCategory().onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread());
     }

@@ -1,12 +1,6 @@
 package com.discuss.ui.category;
 
-import android.util.Log;
-
-import com.discuss.data.DataFetcher;
-import com.discuss.data.impl.DataFetcherImpl;
-import com.discuss.datatypes.Category;
-import com.discuss.datatypes.Question;
-import com.discuss.datatypes.User;
+import com.discuss.data.DataRetriever;
 import com.discuss.datatypes.UserCategoryPreference;
 
 import java.util.List;
@@ -23,7 +17,7 @@ import rx.schedulers.Schedulers;
 
 
 public class CategorySelectorPresenterImpl implements CategorySelectorPresenter {
-    private final DataFetcher dataFetcher;
+    private final DataRetriever dataRetriever;
     private List<UserCategoryPreference> userCategoryPreferences;
     private int limit;
     private volatile boolean isLoading;
@@ -31,18 +25,18 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
     private final ReentrantLock lock = new ReentrantLock();
 
     @Inject
-    public CategorySelectorPresenterImpl(DataFetcher dataFetcher) {
-        this.dataFetcher = dataFetcher;
+    public CategorySelectorPresenterImpl(DataRetriever dataRetriever) {
+        this.dataRetriever = dataRetriever;
     }
 
     private void checkPreConditions() {
-        if (null == dataFetcher || null == userCategoryPreferences) {
+        if (null == dataRetriever || null == userCategoryPreferences) {
             init(onCompleted);
         }
     }
 
     private void setQuestionObservableAndSubscribeForFirstSubscriber() {
-        questionObservable = dataFetcher.   /* hot observable */
+        questionObservable = dataRetriever.   /* hot observable */
                 getUserCategoryPreference(""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).

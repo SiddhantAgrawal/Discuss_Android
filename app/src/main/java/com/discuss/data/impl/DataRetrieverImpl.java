@@ -6,7 +6,7 @@ import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.datatypes.UserCategoryPreference;
 
 import java.util.List;
@@ -22,21 +22,17 @@ import rx.Observable;
  * @author Deepak Thakur
  */
 
-public class DataFetcherImpl implements DataFetcher {
+public class DataRetrieverImpl implements DataRetriever {
     private final DiscussService discussService;
 
     @Inject
-    public DataFetcherImpl(final String endpoint) {
-        discussService = new Retrofit.Builder()
-                .baseUrl(endpoint)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build().create(DiscussService.class);
+    public DataRetrieverImpl(final DiscussService discussService) {
+        this.discussService = discussService;
     }
 
     @Override
-    public Observable<List<Question>> getQuestions(int offset, int limit, String userId) {
-        return discussService.getQuestions("questions/list?offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+    public Observable<List<Question>> getQuestions(int offset, int limit, int userId, final String sortBy, final String sortOrder) {
+        return discussService.getQuestions("questions/list?offset=" + offset + "&limit=" + limit + "&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
@@ -65,7 +61,7 @@ public class DataFetcherImpl implements DataFetcher {
     }
 
     @Override
-    public Observable<Question> getQuestion(String questionId, String userId) {
+    public Observable<Question> getQuestion(int questionId, int userId) {
         return discussService.getQuestion("question/info?questionId=" + questionId + "&userId=" + userId).map(Response::getData);
     }
 
@@ -77,21 +73,6 @@ public class DataFetcherImpl implements DataFetcher {
     @Override
     public Observable<List<UserCategoryPreference>> getUserCategoryPreference(String userId) {
         return discussService.getUserCategoryPreference("category/pref?userId=" + userId).map(Response::getData);
-    }
-
-    @Override
-    public boolean likeQuestion(String questionId, String userId) {
-        return discussService.likeQuestion("question/upvote?questionId=" + questionId + "&userId=" + userId);
-    }
-
-    @Override
-    public boolean likeComment(String questionId, String userId) {
-        return discussService.likeComment("comment/upvote?questionId=" + questionId + "&userId=" + userId);
-    }
-
-    @Override
-    public boolean bookmarkQuestion(String questionId, String userId) {
-        return discussService.bookmarkQuestion("bookmark/question?questionId=" + questionId + "&userId=" + userId);
     }
 
 }

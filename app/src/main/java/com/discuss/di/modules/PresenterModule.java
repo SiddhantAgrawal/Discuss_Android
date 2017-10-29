@@ -1,9 +1,8 @@
 package com.discuss.di.modules;
 
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.ui.bookmark.BookMarkPresenter;
 import com.discuss.ui.bookmark.impl.BookMarkPresenterImpl;
-import com.discuss.ui.category.CategorySelector;
 import com.discuss.ui.category.CategorySelectorPresenter;
 import com.discuss.ui.category.CategorySelectorPresenterImpl;
 import com.discuss.ui.commented.CommentedPresenter;
@@ -27,44 +26,44 @@ public class PresenterModule {
 
     @Provides
     @Singleton
-    MainFeedPresenter providesMainFeedPresenter(DataFetcher dataFetcher) {
-        return new MainFeedPresenterImpl(dataFetcher);
+    MainFeedPresenter providesMainFeedPresenter(DataRetriever dataRetriever) {
+        return new MainFeedPresenterImpl(dataRetriever);
     }
 
     @Provides
     @Singleton
-    LikedPresenter providesLikedPresenter(DataFetcher dataFetcher) {
-        return new LikedPresenterImpl(dataFetcher);
+    LikedPresenter providesLikedPresenter(DataRetriever dataRetriever) {
+        return new LikedPresenterImpl(dataRetriever);
     }
 
     @Provides
     @Singleton
-    QuestionViewPresenter providesQuestionViewPresenter(DataFetcher dataFetcher) {
-        return new QuestionViewPresenterImpl(dataFetcher);
+    QuestionViewPresenter providesQuestionViewPresenter(DataRetriever dataRetriever) {
+        return new QuestionViewPresenterImpl(dataRetriever);
     }
 
     @Provides
     @Singleton
-    CommentedPresenter providesCommentedPresenter(DataFetcher dataFetcher) {
-        return new CommentedPresenterImpl(dataFetcher);
+    CommentedPresenter providesCommentedPresenter(DataRetriever dataRetriever) {
+        return new CommentedPresenterImpl(dataRetriever);
     }
 
     @Provides
     @Singleton
-    BookMarkPresenter providesBookMarkPresenter(DataFetcher dataFetcher) {
-        return new BookMarkPresenterImpl(dataFetcher);
+    BookMarkPresenter providesBookMarkPresenter(DataRetriever dataRetriever) {
+        return new BookMarkPresenterImpl(dataRetriever);
     }
 
     @Provides
     @Singleton
-    CategorySelectorPresenter providesCategorySelectorPresenter(DataFetcher dataFetcher) {
-        return new CategorySelectorPresenterImpl(dataFetcher);
+    CategorySelectorPresenter providesCategorySelectorPresenter(DataRetriever dataRetriever) {
+        return new CategorySelectorPresenterImpl(dataRetriever);
     }
 
     @Provides
     @Singleton
-    QuestionPostPresenter providesQuestionPostPresenter(DataFetcher dataFetcher) {
-        return new QuestionPostPresenterImpl(dataFetcher);
+    QuestionPostPresenter providesQuestionPostPresenter(DataRetriever dataRetriever) {
+        return new QuestionPostPresenterImpl(dataRetriever);
     }
 
 }

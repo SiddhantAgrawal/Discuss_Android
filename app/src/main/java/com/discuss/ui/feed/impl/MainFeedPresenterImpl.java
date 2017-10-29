@@ -1,10 +1,7 @@
 package com.discuss.ui.feed.impl;
 
-import android.util.Log;
-
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.datatypes.Question;
-import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.feed.MainFeedPresenter;
 
 import java.util.List;
@@ -23,7 +20,7 @@ import rx.schedulers.Schedulers;
  * @author Deepak Thakur
  */
 public class MainFeedPresenterImpl implements MainFeedPresenter {
-    private final DataFetcher dataFetcher;
+    private final DataRetriever dataRetriever;
     private List<Question> questions;
     private int limit;
     private volatile boolean isLoading;
@@ -31,17 +28,17 @@ public class MainFeedPresenterImpl implements MainFeedPresenter {
     private final ReentrantLock lock = new ReentrantLock();
 
     @Inject
-    public MainFeedPresenterImpl(DataFetcher dataFetcher) {
-        this.dataFetcher = dataFetcher;
+    public MainFeedPresenterImpl(DataRetriever dataRetriever) {
+        this.dataRetriever = dataRetriever;
     }
     private void checkPreConditions() {
-        if (null == dataFetcher || null == questions) {
+        if (null == dataRetriever || null == questions) {
             init(onCompleted);
         }
     }
 
     private void setQuestionObservableAndSubscribeForFirstSubscriber() {
-        questionObservable = dataFetcher.   /* hot observable */
+        questionObservable = dataRetriever.   /* hot observable */
                 getQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
@@ -98,7 +95,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter {
             return Observable.just(questions.get(position));
         } else {
             update(() -> {});
-            return dataFetcher.   /* cold observable */
+            return dataRetriever.   /* cold observable */
                     getQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
                     onBackpressureBuffer().
                     subscribeOn(Schedulers.io()).

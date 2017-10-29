@@ -1,10 +1,7 @@
 package com.discuss.ui.liked.impl;
 
-import android.util.Log;
-
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.datatypes.Question;
-import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.liked.LikedPresenter;
 
 import java.util.List;
@@ -23,7 +20,7 @@ import rx.schedulers.Schedulers;
  * @author Deepak Thakur
  */
 public class LikedPresenterImpl implements LikedPresenter {
-    private final DataFetcher dataFetcher;
+    private final DataRetriever dataRetriever;
     private List<Question> questions;
     private int limit;
     private volatile boolean isLoading;
@@ -31,17 +28,17 @@ public class LikedPresenterImpl implements LikedPresenter {
     private final ReentrantLock lock = new ReentrantLock();
 
     @Inject
-    public LikedPresenterImpl(DataFetcher dataFetcher) {
-        this.dataFetcher = dataFetcher;
+    public LikedPresenterImpl(DataRetriever dataRetriever) {
+        this.dataRetriever = dataRetriever;
     }
     private void checkPreConditions() {
-        if (null == dataFetcher || null == questions) {
+        if (null == dataRetriever || null == questions) {
             init(onCompleted);
         }
     }
 
     private void setQuestionObservableAndSubscribeForFirstSubscriber() {
-        questionObservable = dataFetcher.   /* hot observable */
+        questionObservable = dataRetriever.   /* hot observable */
                 getLikedQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
@@ -102,7 +99,7 @@ public class LikedPresenterImpl implements LikedPresenter {
         } else {
             update(() -> {
             });
-            return dataFetcher.   /* cold observable */
+            return dataRetriever.   /* cold observable */
                     getLikedQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
                     onBackpressureBuffer().
                     subscribeOn(Schedulers.io()).

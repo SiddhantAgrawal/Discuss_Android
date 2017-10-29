@@ -1,12 +1,9 @@
 package com.discuss.ui.question.view.impl;
 
 
-import android.util.Log;
-
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
-import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.question.view.QuestionViewPresenter;
 
 import java.util.List;
@@ -24,7 +21,7 @@ import rx.schedulers.Schedulers;
 public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>{
 
     private Question question = null;
-    private final DataFetcher dataFetcher;
+    private final DataRetriever dataRetriever;
     private List<Comment> comments;
     private int limit;
     private volatile boolean isLoading = false;
@@ -32,17 +29,17 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>
     private final ReentrantLock lock = new ReentrantLock();
 
     @Inject
-    public QuestionViewPresenterImpl(DataFetcher dataFetcher) {
-        this.dataFetcher = dataFetcher;
+    public QuestionViewPresenterImpl(DataRetriever dataRetriever) {
+        this.dataRetriever = dataRetriever;
     }
     private void checkPreConditions() {
-        if (null == dataFetcher || null == comments) {
+        if (null == dataRetriever || null == comments) {
             init(onCompleted, question);
         }
     }
 
     private void setCommentsObservableAndSubscribeForFirstSubscriber() {
-        commentsObservable = dataFetcher.   /* hot observable */
+        commentsObservable = dataRetriever.   /* hot observable */
                 getCommentsForQuestion(question.getQuestionId(), comments.size(), limit, ""). /* TODO(Deepak): add proper values */
                 onBackpressureBuffer().
                 subscribeOn(Schedulers.io()).
@@ -101,7 +98,7 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>
             return Observable.just(comments.get(position));
         } else {
             update(() -> {});
-            return dataFetcher.   /* cold observable */
+            return dataRetriever.   /* cold observable */
                     getCommentsForQuestion(question.getQuestionId(), position, 1, ""). /* TODO(Deepak): add proper values */
                     onBackpressureBuffer().
                     subscribeOn(Schedulers.io()).

@@ -15,7 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -24,23 +23,12 @@ import android.widget.Toast;
 
 import com.discuss.DiscussApplication;
 import com.discuss.datatypes.Category;
-import com.discuss.data.impl.DataFetcherImpl;
 import com.discuss.ui.question.post.QuestionPostPresenter;
 import com.example.siddhantagrawal.check_discuss.R;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.inject.Inject;
-
-import rx.Observable;
-
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.functions.FuncN;
 
 public class AskQuestionView extends AppCompatActivity {
 

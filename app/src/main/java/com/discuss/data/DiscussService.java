@@ -49,12 +49,12 @@ public interface DiscussService {
     Observable<Response<List<UserCategoryPreference>>> getUserCategoryPreference(@Url final String pathParams);
 
     @GET
-    public boolean likeQuestion(@Url final String pathParams); /* @todo Make it PUT  */
+    public Observable<Response<Boolean>> likeQuestion(@Url final String pathParams); /* @todo Make it PUT  */
 
     @GET
-    public boolean likeComment(@Url final String pathParams);  /* @todo Make it PUT  */
+    public Observable<Response<Boolean>> likeComment(@Url final String pathParams);  /* @todo Make it PUT  */
 
     @GET
-    public boolean bookmarkQuestion(@Url final String pathParams);  /* @todo Make it PUT  */
+    public Observable<Response<Boolean>> bookmarkQuestion(@Url final String pathParams);  /* @todo Make it PUT  */
 
 }

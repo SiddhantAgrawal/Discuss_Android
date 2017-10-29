@@ -1,6 +1,6 @@
 package com.discuss;
 
-import com.discuss.data.DataFetcher;
+import com.discuss.data.DataRetriever;
 import com.discuss.di.modules.DataModule;
 import com.discuss.di.modules.DataModule_ProvidesDataFetcherFactory;
 import com.discuss.di.modules.DataModule_ProvidesEndpointFactory;
@@ -49,7 +49,7 @@ import javax.inject.Provider;
 public final class MainComponentImpl implements MainComponent {
     private Provider<String> providesEndpointProvider;
 
-    private Provider<DataFetcher> providesDataFetcherProvider;
+    private Provider<DataRetriever> providesDataFetcherProvider;
 
     private Provider<MainFeedPresenter> providesMainFeedPresenterProvider;
 
