@@ -1,4 +1,4 @@
-package com.discuss.state;
+package com.discuss.data;
 
 
 import com.discuss.datatypes.Comment;
@@ -73,11 +73,13 @@ public interface StateDiff {
 
     boolean isCommentLiked(final int commentId);
 
-    void flushLikeStateDiffForQuestions(Action0 onCompleted);
+    void flushLikeStateDiffForQuestions();
 
-    void flushLikeStateDiffForComments(Action0 onCompleted);
+    void flushLikeStateDiffForComments();
 
-    void flushBookmarkedStateDiffForQuestions(Action0 onCompleted);
+    void flushBookmarkedStateDiffForQuestions();
+
+    void flushAll();
 
 
 

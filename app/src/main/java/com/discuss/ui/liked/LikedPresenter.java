@@ -16,9 +16,14 @@ import rx.functions.Action0;
  */
 
 public interface LikedPresenter {
+
     void init(Action0 onCompletedAction);
+
     void update(Action0 onCompletedAction);
+
     Observable<Boolean> refresh();
+
     Observable<Question> get(int position);
+
     int size();
 }

@@ -36,13 +36,28 @@ public class DataRetrieverImpl implements DataRetriever {
     }
 
     @Override
-    public Observable<List<Comment>> getCommentsForQuestion(int questionId, int offset, int limit, String userId) {
-        return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+    public Observable<Question> kthQuestion(int kth, int userId, String sortBy, String sortOrder) {
+        return getQuestions(kth, 1, userId, sortBy, sortOrder).map(l -> l.get(0));
     }
 
     @Override
-    public Observable<List<Question>> getBookMarkedQuestions(int offset, int limit, String userId) {
+    public Observable<List<Comment>> getCommentsForQuestion(int questionId, int offset, int limit, int userId, final String sortBy, final String sortOrder) {
+        return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId + "&sortOrder=" + sortOrder + "&userId=" + userId).map(Response::getData);
+    }
+
+    @Override
+    public Observable<Comment> kthCommentForQuestion(int kth, int questionId, int userId, String sortBy, String sortOrder) {
+        return getCommentsForQuestion(questionId, kth, 1, userId, sortBy, sortOrder).map(l -> l.get(0));
+    }
+
+    @Override
+    public Observable<List<Question>> getBookMarkedQuestions(int offset, int limit, int userId) {
         return discussService.getBookMarkedQuestions("user/bookmarked/questions?offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+    }
+
+    @Override
+    public Observable<Question> kthBookMarkedQuestion(int kth, int userId) {
+        return getBookMarkedQuestions(kth, 1, userId).map(l -> l.get(0));
     }
 
     @Override

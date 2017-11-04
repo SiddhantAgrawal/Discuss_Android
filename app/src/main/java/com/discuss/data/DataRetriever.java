@@ -21,9 +21,15 @@ import java.util.List;
 public interface DataRetriever {
     Observable<List<Question>> getQuestions(final int offset, final int limit, final int userId, final String sortBy, final String sortOrder);
 
-    Observable<List<Comment>> getCommentsForQuestion(final int questionId, final int offset, final int limit, final String userId);
+    Observable<Question> kthQuestion(final int kth, final int userId, final String sortBy, final String sortOrder);
 
-    Observable<List<Question>> getBookMarkedQuestions(final int offset, final int limit, final String userId);
+    Observable<List<Comment>> getCommentsForQuestion(final int questionId, final int offset, final int limit, final int userId, final String sortBy, final String sortOrder);
+
+    Observable<Comment> kthCommentForQuestion(int kth, final int questionId, final int userId, final String sortBy, final String sortOrder);
+
+    Observable<List<Question>> getBookMarkedQuestions(final int offset, final int limit, final int userId);
+
+    Observable<Question> kthBookMarkedQuestion(int kth, final int userId);
 
     Observable<List<Question>> getLikedQuestions(final int offset, final int limit, final String userId);
 

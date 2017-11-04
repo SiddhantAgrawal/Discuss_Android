@@ -1,7 +1,10 @@
 package com.discuss.ui.question.view.impl;
 
 
+import com.discuss.data.CommentRepository;
 import com.discuss.data.DataRetriever;
+import com.discuss.data.SortBy;
+import com.discuss.data.SortOrder;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.question.view.QuestionViewPresenter;
@@ -21,69 +24,29 @@ import rx.schedulers.Schedulers;
 public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>{
 
     private Question question = null;
-    private final DataRetriever dataRetriever;
+    private final CommentRepository commentRepository;
     private List<Comment> comments;
-    private int limit;
-    private volatile boolean isLoading = false;
     private Observable<List<Comment>> commentsObservable;
     private final ReentrantLock lock = new ReentrantLock();
+    private final SortBy sortBy;
+    private final SortOrder sortOrder;
 
     @Inject
-    public QuestionViewPresenterImpl(DataRetriever dataRetriever) {
-        this.dataRetriever = dataRetriever;
+    public QuestionViewPresenterImpl(CommentRepository commentRepository, Question question) {
+        this.commentRepository = commentRepository;
+        this.question = question;
+        this.sortBy = SortBy.LIKES;
+        this.sortOrder = SortOrder.DESC;
     }
-    private void checkPreConditions() {
-        if (null == dataRetriever || null == comments) {
-            init(onCompleted, question);
-        }
-    }
-
-    private void setCommentsObservableAndSubscribeForFirstSubscriber() {
-        commentsObservable = dataRetriever.   /* hot observable */
-                getCommentsForQuestion(question.getQuestionId(), comments.size(), limit, ""). /* TODO(Deepak): add proper values */
-                onBackpressureBuffer().
-                subscribeOn(Schedulers.io()).
-                publish().
-                refCount().
-                observeOn(AndroidSchedulers.mainThread());
-
-        commentsObservable.subscribe(onNextCommentsList, onError, (() -> {
-            synchronized (lock) {
-                isLoading = false;
-            }
-        }));
-    }
-
-    private final Action1<List<Comment>> onNextCommentsList = new Action1<List<Comment>>() {
-        @Override
-        public void call(List<Comment> fetchedComments) {
-            comments.addAll(fetchedComments);
-        }
-    };
-
-    private final Action1<Throwable> onError = throwable -> {};
-
-    private final Action0 onCompleted = () -> {};
-
 
     @Override
     public void init(Action0 onCompletedAction, Question question) {
-        this.question = question;
-        comments = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
-        limit = 10;
-        update(onCompletedAction);
+        commentRepository.init(onCompletedAction, sortBy, sortOrder, question.getQuestionId());
     }
 
     @Override
     public void update(Action0 onCompletedAction) {
-        checkPreConditions();
-        synchronized (lock) {
-            if (!isLoading) {
-                isLoading = true;
-                setCommentsObservableAndSubscribeForFirstSubscriber();
-            }
-            commentsObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
-        }
+        commentRepository.ensureKMoreComments(10, onCompletedAction);
     }
 
     @Override
@@ -93,23 +56,13 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>
     }
 
     @Override
-    public Observable<Comment> getComment(int position) {
-        if (null != comments && comments.size() > position) {
-            return Observable.just(comments.get(position));
-        } else {
-            update(() -> {});
-            return dataRetriever.   /* cold observable */
-                    getCommentsForQuestion(question.getQuestionId(), position, 1, ""). /* TODO(Deepak): add proper values */
-                    onBackpressureBuffer().
-                    subscribeOn(Schedulers.io()).
-                    observeOn(AndroidSchedulers.mainThread()).first().map(l -> l.get(0));
-
-        }
+    public Observable<Comment> getComment(int kth) {
+        return commentRepository.kthCommentForQuestion(kth, question.getQuestionId(), sortBy, sortOrder);
     }
 
     @Override
     public int size() {
-        return (null == comments) ? 0 : comments.size();
+        return commentRepository.estimatedSize();
     }
 
     @Override

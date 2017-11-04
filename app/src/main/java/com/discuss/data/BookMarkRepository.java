@@ -1,17 +1,16 @@
 package com.discuss.data;
 
-
 import com.discuss.datatypes.Question;
-
-import java.util.function.Consumer;
 
 import rx.Observable;
 import rx.functions.Action0;
 
+/**
+ * @author Deepak Thakur
+ */
+public interface BookMarkRepository {
 
-public interface QuestionRepository {
-
-    Observable<Question> kthQuestion(final int kth, final SortBy sortBy, final SortOrder sortOrder);
+    Observable<Question> kthQuestion(final int kth);
 
     Observable<Question> getQuestionWithID(final int questionID);
 
@@ -27,5 +26,6 @@ public interface QuestionRepository {
 
     int estimatedSize();
 
-    void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder);
+    void init(Action0 onCompleted);
+
 }

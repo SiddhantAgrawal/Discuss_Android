@@ -1,6 +1,9 @@
 package com.discuss.ui.feed.impl;
 
 import com.discuss.data.DataRetriever;
+import com.discuss.data.QuestionRepository;
+import com.discuss.data.SortBy;
+import com.discuss.data.SortOrder;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.feed.MainFeedPresenter;
 
@@ -20,67 +23,25 @@ import rx.schedulers.Schedulers;
  * @author Deepak Thakur
  */
 public class MainFeedPresenterImpl implements MainFeedPresenter {
-    private final DataRetriever dataRetriever;
-    private List<Question> questions;
-    private int limit;
-    private volatile boolean isLoading;
-    private Observable<List<Question>> questionObservable;
-    private final ReentrantLock lock = new ReentrantLock();
+    private final QuestionRepository questionRepository;
+    private final SortBy sortBy;
+    private final SortOrder sortOrder;
 
     @Inject
-    public MainFeedPresenterImpl(DataRetriever dataRetriever) {
-        this.dataRetriever = dataRetriever;
+    public MainFeedPresenterImpl(QuestionRepository questionRepository) {
+        this.questionRepository = questionRepository;
+        this.sortBy = SortBy.LIKES;
+        this.sortOrder = SortOrder.DESC;
     }
-    private void checkPreConditions() {
-        if (null == dataRetriever || null == questions) {
-            init(onCompleted);
-        }
-    }
-
-    private void setQuestionObservableAndSubscribeForFirstSubscriber() {
-        questionObservable = dataRetriever.   /* hot observable */
-                getQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
-                onBackpressureBuffer().
-                subscribeOn(Schedulers.io()).
-                publish().
-                refCount().
-                observeOn(AndroidSchedulers.mainThread());
-        questionObservable.subscribe(onNextQuestionsList, onError, (() -> {
-            synchronized (lock) {
-                isLoading = false;
-            }
-        }));
-    }
-
-    private final Action1<List<Question>> onNextQuestionsList = new Action1<List<Question>>() {
-        @Override
-        public void call(List<Question> fetchedQuestions) {
-            questions.addAll(fetchedQuestions);
-        }
-    };
-
-    private final Action1<Throwable> onError = throwable -> {};
-
-    private final Action0 onCompleted = () -> {};
-
 
     @Override
     public void init(Action0 onCompletedAction) {
-        questions = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
-        limit = 10;
-        update(onCompletedAction);
+        questionRepository.init(onCompletedAction, this.sortBy, this.sortOrder);
     }
 
     @Override
     public void update(Action0 onCompletedAction) {
-        checkPreConditions();
-        synchronized (lock) {
-            if (!isLoading) {
-                isLoading = true;
-                setQuestionObservableAndSubscribeForFirstSubscriber();
-            }
-            questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
-        }
+        questionRepository.ensureKMoreQuestions(10, onCompletedAction);
     }
 
     @Override
@@ -90,23 +51,13 @@ public class MainFeedPresenterImpl implements MainFeedPresenter {
     }
 
     @Override
-    public Observable<Question> get(int position) {
-        if (null != questions && questions.size() > position) {
-            return Observable.just(questions.get(position));
-        } else {
-            update(() -> {});
-            return dataRetriever.   /* cold observable */
-                    getQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
-                    onBackpressureBuffer().
-                    subscribeOn(Schedulers.io()).
-                    observeOn(AndroidSchedulers.mainThread()).first().map(l -> l.get(0));
-
-        }
+    public Observable<Question> get(int kth) {
+        return questionRepository.kthQuestion(kth, sortBy, sortOrder);
     }
 
     @Override
     public int size() {
-        return (null == questions) ? 0 : questions.size();
+        return questionRepository.estimatedSize();
     }
 
 }

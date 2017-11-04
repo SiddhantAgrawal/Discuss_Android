@@ -16,6 +16,8 @@ import rx.functions.Action0;
  */
 
 public interface QuestionPostPresenter {
+
     void init(Action0 action0);
+
     Observable<List<Category>> getCategories();
 }

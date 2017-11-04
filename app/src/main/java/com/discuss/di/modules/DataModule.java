@@ -6,8 +6,8 @@ import com.discuss.data.DataUpdater;
 import com.discuss.data.DiscussService;
 import com.discuss.data.impl.DataRetrieverImpl;
 import com.discuss.data.impl.DataUpdaterImpl;
-import com.discuss.state.StateDiff;
-import com.discuss.state.impl.StateImpl;
+import com.discuss.data.StateDiff;
+import com.discuss.data.impl.StateImpl;
 
 import javax.inject.Named;
 import javax.inject.Singleton;

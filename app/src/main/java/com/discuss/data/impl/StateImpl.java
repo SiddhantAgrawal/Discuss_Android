@@ -1,24 +1,19 @@
-package com.discuss.state.impl;
+package com.discuss.data.impl;
 
 import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
 
 import com.discuss.data.DataUpdater;
-import com.discuss.datatypes.Comment;
-import com.discuss.datatypes.Question;
-import com.discuss.state.StateDiff;
+import com.discuss.data.StateDiff;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -107,8 +102,8 @@ public class StateImpl implements StateDiff {
     }
 
     @Override
-    public void flushLikeStateDiffForQuestions(Action0 onCompleted) {
-        flush(onCompleted,
+    public void flushLikeStateDiffForQuestions() {
+        flush(() -> {},
                 likedQuestions,
                 questionId -> dataUpdater.likeQuestion(questionId, userId),
                 undoLikedQuestions,
@@ -116,8 +111,8 @@ public class StateImpl implements StateDiff {
     }
 
     @Override
-    public void flushLikeStateDiffForComments(Action0 onCompleted) {
-        flush(onCompleted,
+    public void flushLikeStateDiffForComments() {
+        flush(() -> {},
                 likedComments,
                 commentId -> dataUpdater.likeComment(commentId, userId),
                 undoLikedComments,
@@ -126,8 +121,8 @@ public class StateImpl implements StateDiff {
     }
 
     @Override
-    public void flushBookmarkedStateDiffForQuestions(Action0 onCompleted) {
-        flush(onCompleted,
+    public void flushBookmarkedStateDiffForQuestions() {
+        flush(() -> {},
                 bookmarkedQuestions,
                 questionId -> dataUpdater.bookmarkQuestion(questionId, userId),
                 undoBookmarkedQuestions,
@@ -136,10 +131,20 @@ public class StateImpl implements StateDiff {
 
     }
 
+    @Override
+    public void flushAll() {
+        flushBookmarkedStateDiffForQuestions();
+        flushLikeStateDiffForComments();
+        flushLikeStateDiffForQuestions();
+    }
+
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     <K> void flush(Action0 onCompleted, Map<K, Object> entity, Func1<K, Observable<Pair<K, Boolean>>> entityfunc1, Map<K, Object> undoEntity, Func1<K, Observable<Pair<K, Boolean>>> undoEntityfunc2) {
         Set<K> entityCopy = new HashSet<>(entity.keySet());
+        Set<K> undoEntityCopy = new HashSet<>(undoEntity.keySet());
         entity.clear();
+        undoEntity.clear();
+
         Observable<Pair<K, Boolean>> observable1 = Observable.from(entityCopy).
                 flatMap(entityfunc1).doOnNext(new Action1<Pair<K, Boolean>>() {
             @Override
@@ -149,9 +154,6 @@ public class StateImpl implements StateDiff {
                 }
             }
         });
-
-        Set<K> undoEntityCopy = new HashSet<>(undoEntity.keySet());
-        undoEntity.clear();
 
         Observable<Pair<K, Boolean>> observable2 = Observable.from(undoEntityCopy).
                 flatMap(undoEntityfunc2).doOnNext(new Action1<Pair<K, Boolean>>() {

@@ -5,6 +5,7 @@ import android.util.Pair;
 import rx.Observable;
 
 public interface DataUpdater {
+
     Observable<Pair<Integer, Boolean>> likeQuestion(final int questionId, final int userId);
 
     Observable<Pair<Integer, Boolean>> likeComment( final int questionId, final int userId);
