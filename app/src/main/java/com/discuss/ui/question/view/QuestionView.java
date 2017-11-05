@@ -23,6 +23,7 @@ import com.example.siddhantagrawal.check_discuss.R;
 import javax.inject.Inject;
 
 import rx.functions.Action0;
+import rx.functions.Action1;
 
 /**
  * @author Siddhant Agrawal
@@ -46,7 +47,7 @@ public class QuestionView extends Activity {
         mProgressDialog.setMessage("loading... thanks for your patience");
         mProgressDialog.show();
         Intent intent = getIntent();
-        Question question = (Question) intent.getSerializableExtra("question");
+        int questionID =  intent.getIntExtra("questionId", 0);
 
         questionViewPresenter.init(new Action0() {
             @Override
@@ -57,7 +58,7 @@ public class QuestionView extends Activity {
                 listview.setOnScrollListener(new EndlessScrollListener(() -> questionViewPresenter.update(() -> adapter.notifyDataSetChanged()), 4));
                 mProgressDialog.dismiss();
             }
-        }, question);
+        }, questionID);
 
 
     }
@@ -98,10 +99,21 @@ public class QuestionView extends Activity {
             TextView textViewForPostedBy = (TextView) itemView.findViewById(R.id.question_complete_postedby_value);
             TextView textViewForDifficultyLevel = (TextView) itemView.findViewById(R.id.question_complete_difficulty_value);
 
-            textViewForQuestion.setText(questionViewPresenter.getQuestion().getText());
-            textViewForLikes.setText(Integer.toString(questionViewPresenter.getQuestion().getLikes()));
-            textViewForPostedBy.setText(questionViewPresenter.getQuestion().getUserName());
-            textViewForDifficultyLevel.setText(questionViewPresenter.getQuestion().getDifficulty());
+            questionViewPresenter.getQuestion().subscribe(new Action1<Question>() {
+                @Override
+                public void call(Question question) {
+                    textViewForQuestion.setText(question.getText());
+                    textViewForLikes.setText(question.getLikes());
+                    textViewForPostedBy.setText(question.getUserName());
+                    textViewForDifficultyLevel.setText(question.getDifficulty());
+
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("QuestionView", throwable.toString());
+                }
+            });
 
             return itemView;
         }
@@ -111,15 +123,25 @@ public class QuestionView extends Activity {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             View itemView = inflater.inflate(R.layout.comment_short, parent, false);
-            final Comment comment = questionViewPresenter.getComment(position).toBlocking().first();
+            questionViewPresenter.getComment(position).subscribe(new Action1<Comment>() {
+                @Override
+                public void call(Comment comment) {
+                    TextView questionText = (TextView) itemView.findViewById(R.id.comment_short_question);
+                    TextView likes = (TextView) itemView.findViewById(R.id.comment_short_like_value);
+                    TextView postedBy = (TextView) itemView.findViewById(R.id.comment_short_user_value);
 
-            TextView questionText = (TextView) itemView.findViewById(R.id.comment_short_question);
-            TextView likes = (TextView) itemView.findViewById(R.id.comment_short_like_value);
-            TextView postedBy = (TextView) itemView.findViewById(R.id.comment_short_user_value);
+                    questionText.setText(comment.getText());
+                    likes.setText(Integer.toString(comment.getLikes()));
+                    postedBy.setText(comment.getUserName());
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("QuestionView", throwable.toString());
+                }
+            });
 
-            questionText.setText(comment.getText());
-            likes.setText(Integer.toString(comment.getLikes()));
-            postedBy.setText(comment.getUserName());
+
 
             return itemView;
         }

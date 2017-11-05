@@ -1,5 +1,6 @@
 package com.discuss.data.impl;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.discuss.data.DataRetriever;
@@ -13,7 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 /**
  *
@@ -43,14 +46,14 @@ public class LikedQuestionsRepositoryImpl implements LikedQuestionsRepository{
         }
 
         public synchronized void clear() {
-            this.questionRankMap = null;
+            this.questionRankMap = new ConcurrentHashMap<>();
             this.updateInProcess = false;
             this.maxRank = -1;
             LikedQuestionsRepositoryImpl.this.stateDiff.flushAll();
         }
         synchronized void updateType() {
             this.updateInProcess = false;
-            this.questionRankMap = null;
+            this.questionRankMap = new ConcurrentHashMap<>();
             LikedQuestionsRepositoryImpl.this.stateDiff.flushAll();
         }
 
@@ -73,7 +76,7 @@ public class LikedQuestionsRepositoryImpl implements LikedQuestionsRepository{
 
     @Override
     public Observable<Question> kthQuestion(int kth) {
-        return this.state.putIfAbsent(kth, dataRetriever.kthBookMarkedQuestion(kth, userID).cache());
+        return this.state.putIfAbsent(kth, dataRetriever.kthLikedQuestion(kth, userID).cache());
     }
 
     @Override
@@ -82,7 +85,9 @@ public class LikedQuestionsRepositoryImpl implements LikedQuestionsRepository{
         return question.map(Observable::just)
                 .orElseGet(() -> dataRetriever.getQuestion(questionID, userID)
                         .doOnNext(this.state::putInCachedQuestions)
-                        .cache());
+                        .cache())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())  ;
 
     }
 
@@ -142,14 +147,18 @@ public class LikedQuestionsRepositoryImpl implements LikedQuestionsRepository{
 
     @Override
     public synchronized void ensureKMoreQuestions(int k, Action0 onCompleted) {
-        if(this.state.updateInProcess)
-            Observable.just(true);
+        if(this.state.updateInProcess) {
+            onCompleted.call();
+            return;
+        }
         this.state.updateInProcess = true;
         int offset = this.state.maxRank + 1;
-        dataRetriever.getBookMarkedQuestions(offset, k, userID)
+        dataRetriever.getLikedQuestions(offset, k, userID)
                 .flatMap(Observable::from)
                 .zipWith(Observable.range(offset, k), (question, id) -> new Pair<Integer, Question>(id, question))
                 .cache()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Pair<Integer, Question>>() {
                     @Override
                     public void onCompleted() {

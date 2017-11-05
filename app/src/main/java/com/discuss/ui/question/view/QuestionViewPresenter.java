@@ -11,7 +11,7 @@ import rx.functions.Action0;
  */
 public interface QuestionViewPresenter<T> {
 
-    void init(Action0 action0, Question question);
+    void init(Action0 action0, int questionID);
 
     void update(Action0 onCompletedAction);
 
@@ -21,5 +21,5 @@ public interface QuestionViewPresenter<T> {
 
     int size();
 
-    Question getQuestion();
+    Observable<Question> getQuestion();
 }

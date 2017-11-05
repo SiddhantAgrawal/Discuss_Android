@@ -1,5 +1,7 @@
 package com.discuss.ui.feed.impl;
 
+import android.util.Log;
+
 import com.discuss.data.DataRetriever;
 import com.discuss.data.QuestionRepository;
 import com.discuss.data.SortBy;

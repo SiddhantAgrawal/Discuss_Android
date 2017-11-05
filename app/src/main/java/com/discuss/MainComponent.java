@@ -3,6 +3,7 @@ package com.discuss;
 
 import com.discuss.di.modules.DataModule;
 import com.discuss.di.modules.PresenterModule;
+import com.discuss.di.modules.RepositoryModule;
 import com.discuss.ui.bookmark.impl.BookMarkFragment;
 import com.discuss.ui.category.CategorySelector;
 import com.discuss.ui.commented.impl.CommentedQuestionFragment;
@@ -19,7 +20,7 @@ import dagger.Component;
  * @author Deepak Thakur
  */
 @Singleton
-@Component(modules = {PresenterModule.class, DataModule.class})
+@Component(modules = {PresenterModule.class, DataModule.class, RepositoryModule.class})
 public interface MainComponent {
     void inject(MainActivity mainActivity);
     void inject(BookMarkFragment bookMarkFragment);

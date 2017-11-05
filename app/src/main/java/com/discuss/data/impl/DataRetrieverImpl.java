@@ -61,13 +61,23 @@ public class DataRetrieverImpl implements DataRetriever {
     }
 
     @Override
-    public Observable<List<Question>> getLikedQuestions(int offset, int limit, String userId) {
+    public Observable<List<Question>> getLikedQuestions(int offset, int limit, int userId) {
         return discussService.getLikedQuestions("questions/liked?offset=" + offset + "&limit=" + limit).map(Response::getData);
     }
 
     @Override
-    public Observable<List<Question>> getCommentedQuestions(int offset, int limit, String userId) {
-        return discussService.getCommentedQuestions("questions/liked?offset=" + offset + "&limit=" + limit).map(Response::getData);
+    public Observable<Question> kthLikedQuestion(int kth, int userId) {
+        return getLikedQuestions(kth, 1, userId).map(l -> l.get(0));
+    }
+
+    @Override
+    public Observable<List<Question>> getCommentedQuestions(int offset, int limit, int userId) {
+        return discussService.getCommentedQuestions("questions/commented?offset=" + offset + "&limit=" + limit).map(Response::getData);
+    }
+
+    @Override
+    public Observable<Question> kthCommentedQuestion(int kth, int userId) {
+        return getCommentedQuestions(kth, 1, userId).map(l -> l.get(0));
     }
 
     @Override

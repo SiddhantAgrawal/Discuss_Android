@@ -31,9 +31,13 @@ public interface DataRetriever {
 
     Observable<Question> kthBookMarkedQuestion(int kth, final int userId);
 
-    Observable<List<Question>> getLikedQuestions(final int offset, final int limit, final String userId);
+    Observable<List<Question>> getLikedQuestions(final int offset, final int limit, final int userId);
 
-    Observable<List<Question>> getCommentedQuestions(final int offset, final int limit, final String userId);
+    Observable<Question> kthLikedQuestion(final int kth, final int userId);
+
+    Observable<List<Question>> getCommentedQuestions(final int offset, final int limit, final int userId);
+
+    Observable<Question> kthCommentedQuestion(final int kth, final int userId);
 
     Observable<List<Comment>> getUserAddedComments(final int offset, final int limit, final String userId);
 

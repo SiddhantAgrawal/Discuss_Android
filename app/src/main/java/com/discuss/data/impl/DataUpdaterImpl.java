@@ -20,17 +20,20 @@ public class DataUpdaterImpl implements DataUpdater {
     }
     @Override
     public Observable<Pair<Integer, Boolean>> likeQuestion(int questionId, int userId) {
-        return discussService.likeQuestion("question/upvote?questionId=" + questionId + "&userId=" + userId).map(r -> new Pair<>(questionId, r.getData()));
+        //return discussService.likeQuestion("question/upvote?questionId=" + questionId + "&userId=" + userId).map(r -> new Pair<>(questionId, r.getData()));
+        return Observable.just(new Pair<>(questionId, true));
     }
 
     @Override
     public Observable<Pair<Integer, Boolean>> likeComment(int questionId, int userId) {
-        return discussService.likeComment("comment/upvote?questionId=" + questionId + "&userId=" + userId).map(r -> new Pair<>(questionId, r.getData()));
+        //return discussService.likeComment("comment/upvote?questionId=" + questionId + "&userId=" + userId).map(r -> new Pair<>(questionId, r.getData()));
+        return Observable.just(new Pair<>(questionId, true));
     }
 
     @Override
     public Observable<Pair<Integer, Boolean>> bookmarkQuestion(int questionId, int userId) {
-        return discussService.bookmarkQuestion("bookmark/question?questionId=" + questionId + "&userId=" + userId).map(r -> new Pair<>(questionId, r.getData()));
+        //return discussService.bookmarkQuestion("bookmark/question?questionId=" + questionId + "&userId=" + userId).map(r -> new Pair<>(questionId, r.getData()));
+        return Observable.just(new Pair<>(questionId, true));
     }
 
     @Override

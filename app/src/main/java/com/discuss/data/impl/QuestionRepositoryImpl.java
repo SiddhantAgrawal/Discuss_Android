@@ -1,5 +1,6 @@
 package com.discuss.data.impl;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.discuss.data.DataRetriever;
@@ -14,9 +15,12 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * @author Deepak Thakur
@@ -37,32 +41,37 @@ public class QuestionRepositoryImpl implements QuestionRepository {
         private Map<Integer, Question> questionIDMap;
         State() {
             this.questionRankMap = new ConcurrentHashMap<>();
-            questionIDMap = new ConcurrentHashMap<>();
+            this.questionIDMap = new ConcurrentHashMap<>();
             this.sortBy = SortBy.LIKES;
             this.sortOrder = SortOrder.DESC;
             this.updateInProcess = false;
             this.maxRank = -1;
         }
         synchronized Observable<Question> putIfAbsent(int rank, Observable<Question> questionObservable) {
-            questionRankMap.putIfAbsent(rank, questionObservable);
+            if(null == questionRankMap.putIfAbsent(rank, questionObservable)) {
+                questionObservable.subscribe(question -> {
+                    questionIDMap.put(question.getQuestionId(), question);
+                });
+            }
             maxRank = Math.max(rank, maxRank);
-            questionObservable.doOnNext(question -> questionIDMap.put(question.getQuestionId(), question));
             return questionRankMap.get(rank);
         }
 
         public synchronized void clear() {
             this.sortBy = null;
             this.sortOrder = null;
-            this.questionRankMap = null;
+            this.questionRankMap = new ConcurrentHashMap<>();
             this.updateInProcess = false;
             this.maxRank = -1;
-            stateDiff.flushAll();
+            //stateDiff.flushAll();
         }
         synchronized void updateType(SortOrder sortOrder, SortBy sortBy) {
+            this.maxRank = -1;
             this.sortBy = sortBy;
             this.sortOrder = sortOrder;
-            this.questionRankMap = null;
-            stateDiff.flushAll();
+            this.updateInProcess = false;
+            this.questionRankMap = new ConcurrentHashMap<>();
+            //stateDiff.flushAll();
         }
         synchronized SortOrder getSortOrder() {
             return this.sortOrder;
@@ -95,13 +104,11 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             return this.state.putIfAbsent(kth, dataRetriever.kthQuestion(kth, userID, sortBy.name(), sortOrder.name()).cache());
         } else {
            this.state.updateType(sortOrder, sortBy);
-           return dataRetriever.getQuestions(0, kth + 1, userID, sortBy.name(), sortOrder.name())
-                    .flatMap(Observable::from)
-                    .zipWith(Observable.range(0, kth), (question, id) -> new Pair<Integer, Question>(id, question))
-                    .doOnNext(pair -> this.state.putIfAbsent(pair.first + kth, Observable.just(pair.second).cache()))
-                    .last()
-                    .map(pair -> pair.second)
-                    .cache();
+           ensureKMoreQuestions(10, () -> {});
+           return dataRetriever.kthQuestion(kth, userID, sortBy.name(), sortOrder.name())
+                    .cache()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
         }
     }
 
@@ -173,6 +180,7 @@ public class QuestionRepositoryImpl implements QuestionRepository {
     public synchronized void ensureKMoreQuestions(int k, Action0 onCompleted) {
         if(this.state.updateInProcess) {
             onCompleted.call();
+            return;
         }
         this.state.updateInProcess = true;
         int offset = this.state.maxRank + 1;
@@ -180,6 +188,8 @@ public class QuestionRepositoryImpl implements QuestionRepository {
                 .flatMap(Observable::from)
                 .zipWith(Observable.range(offset, k), (question, id) -> new Pair<Integer, Question>(id, question))
                 .cache()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Pair<Integer, Question>>() {
                     @Override
                     public void onCompleted() {
@@ -189,6 +199,8 @@ public class QuestionRepositoryImpl implements QuestionRepository {
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.e("QuestionRepo", e.toString());
+                        onCompleted.call();
                     }
 
                     @Override

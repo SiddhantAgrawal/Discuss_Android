@@ -17,6 +17,7 @@ import rx.functions.Action0;
 public interface CommentRepository {
     Observable<Comment> kthCommentForQuestion(final int kth, final int questionID, final SortBy sortBy, final SortOrder sortOrder);
     Observable<Question> getQuestion(final int kth, final SortBy sortBy, final SortOrder sortOrder);
+    Observable<Question> getQuestionWithID(final int id);
     Observable<Boolean> likeCommentWithID(final int questionID);
     Observable<Boolean> unlikeCommentWithID(final int questionID);
     int estimatedSize();

@@ -3,8 +3,8 @@ package com.discuss.data.impl;
 import android.util.Log;
 import android.util.Pair;
 
-import com.discuss.data.BookMarkRepository;
 import com.discuss.data.DataRetriever;
+import com.discuss.data.QuestionsAnsweredRepository;
 import com.discuss.data.StateDiff;
 import com.discuss.datatypes.Question;
 
@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -21,13 +20,15 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
+ *
  * @author Deepak Thakur
  */
-public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
+public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredRepository {
+
     private final DataRetriever dataRetriever;
     private final StateDiff stateDiff;
     private final int userID;
-    private final BookMarkQuestionRepositoryImpl.State state;
+    private final QuestionsAnsweredRepositoryImpl.State state;
     private final class State {
         private volatile boolean updateInProcess;
         private volatile int maxRank;
@@ -40,13 +41,11 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
             this.maxRank = -1;
         }
         synchronized Observable<Question> putIfAbsent(int rank, Observable<Question> questionObservable) {
-            if( null == questionRankMap.putIfAbsent(rank, questionObservable)) {
-                questionObservable.subscribeOn(Schedulers.io()).
-                        observeOn(AndroidSchedulers.mainThread()).
-                        subscribe(question -> questionIDMap.put(question.getQuestionId(), question), new Action1<Throwable>() {
+            if(null == questionRankMap.putIfAbsent(rank, questionObservable)){
+                questionObservable.subscribe(question -> questionIDMap.put(question.getQuestionId(), question), new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.e("BookMarkQuestionRepo", throwable.toString());
+                        Log.e("quesAnsweredRepo", throwable.toString());
                     }
                 });
             }
@@ -59,12 +58,12 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
             this.questionRankMap = new ConcurrentHashMap<>();
             this.updateInProcess = false;
             this.maxRank = -1;
-            BookMarkQuestionRepositoryImpl.this.stateDiff.flushAll();
+            QuestionsAnsweredRepositoryImpl.this.stateDiff.flushAll();
         }
         synchronized void updateType() {
             this.updateInProcess = false;
             this.questionRankMap = new ConcurrentHashMap<>();
-            BookMarkQuestionRepositoryImpl.this.stateDiff.flushAll();
+            QuestionsAnsweredRepositoryImpl.this.stateDiff.flushAll();
         }
 
         synchronized Optional<Question> getQuestion(final int id) {
@@ -74,19 +73,19 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
             questionIDMap.put(question.getQuestionId(), question);
         }
     }
-    public BookMarkQuestionRepositoryImpl(DataRetriever dataRetriever,
-                                  StateDiff stateDiff,
-                                  final int userID) {
+    public QuestionsAnsweredRepositoryImpl(DataRetriever dataRetriever,
+                                        StateDiff stateDiff,
+                                        final int userID) {
         this.dataRetriever = dataRetriever;
         this.stateDiff = stateDiff;
-        this.state = new BookMarkQuestionRepositoryImpl.State();
+        this.state = new QuestionsAnsweredRepositoryImpl.State();
         this.userID = userID;
     }
 
 
     @Override
     public Observable<Question> kthQuestion(int kth) {
-        return this.state.putIfAbsent(kth, dataRetriever.kthBookMarkedQuestion(kth, userID).cache());
+        return this.state.putIfAbsent(kth, dataRetriever.kthCommentedQuestion(kth, userID).cache());
     }
 
     @Override
@@ -95,9 +94,9 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
         return question.map(Observable::just)
                 .orElseGet(() -> dataRetriever.getQuestion(questionID, userID)
                         .doOnNext(this.state::putInCachedQuestions)
-                        .cache()
+                        .cache())
                         .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()));
+                        .observeOn(AndroidSchedulers.mainThread());
 
     }
 
@@ -163,7 +162,7 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
         }
         this.state.updateInProcess = true;
         int offset = this.state.maxRank + 1;
-        dataRetriever.getBookMarkedQuestions(offset, k, userID)
+        dataRetriever.getCommentedQuestions(offset, k, userID)
                 .flatMap(Observable::from)
                 .zipWith(Observable.range(offset, k), (question, id) -> new Pair<Integer, Question>(id, question))
                 .cache()
@@ -172,10 +171,8 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
                 .subscribe(new Subscriber<Pair<Integer, Question>>() {
                     @Override
                     public void onCompleted() {
-                        BookMarkQuestionRepositoryImpl.this.state.updateInProcess = false;
-                        if (null != onCompleted) {
-                            onCompleted.call();
-                        }
+                        QuestionsAnsweredRepositoryImpl.this.state.updateInProcess = false;
+                        onCompleted.call();
                     }
 
                     @Override
@@ -184,7 +181,7 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
 
                     @Override
                     public void onNext(Pair<Integer, Question> rankQuestionPair) {
-                        BookMarkQuestionRepositoryImpl.this.state.putIfAbsent(rankQuestionPair.first, Observable.just(rankQuestionPair.second).cache());
+                        QuestionsAnsweredRepositoryImpl.this.state.putIfAbsent(rankQuestionPair.first, Observable.just(rankQuestionPair.second).cache());
                     }
                 });
     }

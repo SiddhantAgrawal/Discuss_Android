@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
             });
             itemView.setOnClickListener(arg0 -> {
                 Intent intent = new Intent(context, QuestionView.class);
-                intent.putExtra("question", question);
+                intent.putExtra("questionId", question.getQuestionId());
                 context.startActivity(intent);
             });
             return itemView;

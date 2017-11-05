@@ -1,6 +1,11 @@
 package com.discuss.di.modules;
 
+import com.discuss.data.BookMarkRepository;
+import com.discuss.data.CommentRepository;
 import com.discuss.data.DataRetriever;
+import com.discuss.data.LikedQuestionsRepository;
+import com.discuss.data.QuestionRepository;
+import com.discuss.data.QuestionsAnsweredRepository;
 import com.discuss.ui.bookmark.BookMarkPresenter;
 import com.discuss.ui.bookmark.impl.BookMarkPresenterImpl;
 import com.discuss.ui.category.CategorySelectorPresenter;
@@ -16,6 +21,7 @@ import com.discuss.ui.question.post.impl.QuestionPostPresenterImpl;
 import com.discuss.ui.question.view.QuestionViewPresenter;
 import com.discuss.ui.question.view.impl.QuestionViewPresenterImpl;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -25,45 +31,53 @@ import dagger.Provides;
 public class PresenterModule {
 
     @Provides
-    @Singleton
-    MainFeedPresenter providesMainFeedPresenter(DataRetriever dataRetriever) {
-        return new MainFeedPresenterImpl(dataRetriever);
+    MainFeedPresenter providesMainFeedPresenter(QuestionRepository questionRepository) {
+        return new MainFeedPresenterImpl(questionRepository);
     }
 
     @Provides
-    @Singleton
-    LikedPresenter providesLikedPresenter(DataRetriever dataRetriever) {
-        return new LikedPresenterImpl(dataRetriever);
+    LikedPresenter providesLikedPresenter(LikedQuestionsRepository likedQuestionsRepository) {
+        return new LikedPresenterImpl(likedQuestionsRepository);
     }
 
     @Provides
-    @Singleton
-    QuestionViewPresenter providesQuestionViewPresenter(DataRetriever dataRetriever) {
+    QuestionViewPresenter providesQuestionViewPresenter(CommentRepository dataRetriever) {
         return new QuestionViewPresenterImpl(dataRetriever);
     }
 
     @Provides
-    @Singleton
-    CommentedPresenter providesCommentedPresenter(DataRetriever dataRetriever) {
-        return new CommentedPresenterImpl(dataRetriever);
+    CommentedPresenter providesCommentedPresenter(QuestionsAnsweredRepository answeredRepository) {
+        return new CommentedPresenterImpl(answeredRepository);
     }
 
     @Provides
-    @Singleton
-    BookMarkPresenter providesBookMarkPresenter(DataRetriever dataRetriever) {
-        return new BookMarkPresenterImpl(dataRetriever);
+    BookMarkPresenter providesBookMarkPresenter(BookMarkRepository bookMarkRepository) {
+        return new BookMarkPresenterImpl(bookMarkRepository);
     }
 
     @Provides
-    @Singleton
     CategorySelectorPresenter providesCategorySelectorPresenter(DataRetriever dataRetriever) {
         return new CategorySelectorPresenterImpl(dataRetriever);
     }
 
     @Provides
-    @Singleton
     QuestionPostPresenter providesQuestionPostPresenter(DataRetriever dataRetriever) {
         return new QuestionPostPresenterImpl(dataRetriever);
     }
+
+    @Provides
+    @Singleton
+    @Named("user_name")
+    public String providesUserName() {
+        return "Janice";
+    }
+
+    @Provides
+    @Singleton
+    @Named("user_id")
+    public int providesUserID() {
+        return 10;
+    }
+
 
 }

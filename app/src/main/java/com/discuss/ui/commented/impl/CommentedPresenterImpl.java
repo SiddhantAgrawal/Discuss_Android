@@ -1,7 +1,9 @@
 package com.discuss.ui.commented.impl;
 
 
+import com.discuss.data.BookMarkRepository;
 import com.discuss.data.DataRetriever;
+import com.discuss.data.QuestionsAnsweredRepository;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.commented.CommentedPresenter;
 
@@ -21,99 +23,36 @@ import rx.schedulers.Schedulers;
  * @author Deepak Thakur
  */
 public class CommentedPresenterImpl implements CommentedPresenter {
-    private final DataRetriever dataRetriever;
-    private List<Question> questions;
-    private int limit;
-    private volatile boolean isLoading;
-    private Observable<List<Question>> questionObservable;
-    private final ReentrantLock lock = new ReentrantLock();
+    private final QuestionsAnsweredRepository answeredRepository;
 
     @Inject
-    public CommentedPresenterImpl(DataRetriever dataRetriever) {
-        this.dataRetriever = dataRetriever;
+    public CommentedPresenterImpl(QuestionsAnsweredRepository answeredRepository) {
+        this.answeredRepository = answeredRepository;
     }
-
-    private void checkPreConditions() {
-        if (null == dataRetriever || null == questions) {
-            init(onCompleted);
-        }
-    }
-
-    private void setQuestionObservableAndSubscribeForFirstSubscriber() {
-        questionObservable = dataRetriever.   /* hot observable */
-                getCommentedQuestions(questions.size(), limit, ""). /* TODO(Deepak): add proper values */
-                onBackpressureBuffer().
-                subscribeOn(Schedulers.io()).
-                publish().
-                refCount().
-                observeOn(AndroidSchedulers.mainThread());
-        questionObservable.subscribe(onNextQuestionsList, onError, (() -> {
-            synchronized (lock) {
-                isLoading = false;
-            }
-        }));
-    }
-
-    private final Action1<List<Question>> onNextQuestionsList = new Action1<List<Question>>() {
-        @Override
-        public void call(List<Question> fetchedQuestions) {
-            questions.addAll(fetchedQuestions);
-        }
-    };
-
-    private final Action1<Throwable> onError = throwable -> {
-    };
-
-    private final Action0 onCompleted = () -> {
-    };
-
 
     @Override
     public void init(Action0 onCompletedAction) {
-        questions = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
-        limit = 10;
-        update(onCompletedAction);
+        answeredRepository.init(onCompletedAction);
     }
 
     @Override
     public void update(Action0 onCompletedAction) {
-        checkPreConditions();
-        synchronized (lock) {
-            if (!isLoading) {
-                isLoading = true;
-                setQuestionObservableAndSubscribeForFirstSubscriber();
-            }
-            questionObservable.subscribe((a) -> {
-            }, (a) -> {
-            }, onCompletedAction);
-        }
+        answeredRepository.ensureKMoreQuestions(10, onCompletedAction);
     }
 
     @Override
     public Observable<Boolean> refresh() {
-        init(() -> {
-        });
+        init(() -> {});
         return Observable.just(true);
     }
 
     @Override
-    public Observable<Question> get(int position) {
-        if (null != questions && questions.size() > position) {
-            return Observable.just(questions.get(position));
-        } else {
-            update(() -> {
-            });
-            return dataRetriever.   /* cold observable */
-                    getCommentedQuestions(position, 1, ""). /* TODO(Deepak): add proper values */
-                    onBackpressureBuffer().
-                    subscribeOn(Schedulers.io()).
-                    observeOn(AndroidSchedulers.mainThread()).first().map(l -> l.get(0));
-
-        }
+    public Observable<Question> get(int kth) {
+        return answeredRepository.kthQuestion(kth);
     }
 
     @Override
     public int size() {
-        return (null == questions) ? 0 : questions.size();
+        return answeredRepository.estimatedSize();
     }
 }
