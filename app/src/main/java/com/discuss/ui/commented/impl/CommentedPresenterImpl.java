@@ -37,7 +37,7 @@ public class CommentedPresenterImpl implements CommentedPresenter {
 
     @Override
     public void update(Action0 onCompletedAction) {
-        answeredRepository.ensureKMoreQuestions(10, onCompletedAction);
+        answeredRepository.ensureKMoreQuestions(onCompletedAction);
     }
 
     @Override

@@ -21,6 +21,6 @@ public interface CommentRepository {
     Observable<Boolean> likeCommentWithID(final int questionID);
     Observable<Boolean> unlikeCommentWithID(final int questionID);
     int estimatedSize();
-    void ensureKMoreComments(int k, Action0 onCompleted);
+    void ensureKMoreComments(Action0 onCompleted);
     void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID);
 }

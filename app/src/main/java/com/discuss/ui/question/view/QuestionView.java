@@ -108,12 +108,7 @@ public class QuestionView extends Activity {
                     textViewForDifficultyLevel.setText(question.getDifficulty());
 
                 }
-            }, new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    Log.e("QuestionView", throwable.toString());
-                }
-            });
+            }, throwable -> {});
 
             return itemView;
         }
@@ -136,9 +131,7 @@ public class QuestionView extends Activity {
                 }
             }, new Action1<Throwable>() {
                 @Override
-                public void call(Throwable throwable) {
-                    Log.e("QuestionView", throwable.toString());
-                }
+                public void call(Throwable throwable) {}
             });
 
 

@@ -1,14 +1,13 @@
 package com.discuss.data;
 
-
 import com.discuss.datatypes.Question;
-
-import java.util.function.Consumer;
 
 import rx.Observable;
 import rx.functions.Action0;
 
-
+/**
+ * @author Deepak Thakur
+ */
 public interface QuestionRepository {
 
     Observable<Question> kthQuestion(final int kth, final SortBy sortBy, final SortOrder sortOrder);
@@ -23,7 +22,7 @@ public interface QuestionRepository {
 
     Observable<Boolean> unbookmarkQuestionWithID(final int questionID);
 
-    void ensureKMoreQuestions(int k, Action0 onCompleted);
+    void ensureKMoreQuestions(Action0 onCompleted);
 
     int estimatedSize();
 

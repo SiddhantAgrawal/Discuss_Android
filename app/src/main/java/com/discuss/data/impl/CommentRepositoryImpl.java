@@ -1,7 +1,6 @@
 package com.discuss.data.impl;
 
 import android.util.Log;
-import android.util.Pair;
 
 import com.discuss.data.CommentRepository;
 import com.discuss.data.DataRetriever;
@@ -12,16 +11,14 @@ import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.data.StateDiff;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
-import rx.Scheduler;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -51,14 +48,10 @@ public class CommentRepositoryImpl implements CommentRepository {
             this.state.getSortBy() == sortBy &&
             this.state.question != null &&
             this.state.question.getQuestionId() == questionID) {
-            return this.state.putIfAbsent(kth, dataRetriever.kthCommentForQuestion(kth, questionID, userID, sortBy.name(), sortOrder.name()).cache());
+            return this.state.kthComment(kth);
         } else {
             this.state.updateType(sortOrder, sortBy, questionID);
-            ensureKMoreComments(10, () -> {});
-            return dataRetriever.kthCommentForQuestion(kth, questionID, userID, sortBy.name(), sortOrder.name())
-                    .cache()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
+            return this.state.kthComment(kth);
         }
     }
 
@@ -100,41 +93,12 @@ public class CommentRepositoryImpl implements CommentRepository {
     @Override
     public void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID) {
         this.state.updateType(sortOrder, sortBy, questionID);
-        ensureKMoreComments(10, onCompleted);
+        ensureKMoreComments(onCompleted);
     }
 
 
-    public synchronized void ensureKMoreComments(int k, Action0 onCompleted) {
-        if(this.state.updateInProcess) {
-            onCompleted.call();
-            return;
-        }
-        this.state.updateInProcess = true;
-        int offset = this.state.maxRank + 1;
-        dataRetriever.getCommentsForQuestion(this.state.question.getQuestionId(), offset, k, userID, this.state.sortBy.name(), this.state.sortOrder.name())
-                .flatMap(Observable::from)
-                .zipWith(Observable.range(offset, k), (comment, id) -> new Pair<Integer, Comment>(id, comment))
-                .cache()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Pair<Integer, Comment>>() {
-                    @Override
-                    public void onCompleted() {
-                        CommentRepositoryImpl.this.state.updateInProcess = false;
-                        onCompleted.call();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("CommentRepo",  e.toString());
-                    }
-
-                    @Override
-                    public void onNext(Pair<Integer, Comment> rankCommentPair) {
-                        CommentRepositoryImpl.this.state.putIfAbsent(rankCommentPair.first, Observable.just(rankCommentPair.second).cache());
-                    }
-                });
-
+    public synchronized void ensureKMoreComments(Action0 onCompleted) {
+        this.state.ensureMoreComments(onCompleted);
     }
 
     @Override
@@ -143,9 +107,9 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     private final class State {
-        private volatile boolean updateInProcess;
+        private volatile int slab;
         private volatile int maxRank;
-        private Map<Integer, Observable<Comment>> commentRankMap;
+        private Map<Integer, Observable<List<Comment>>> commentRankMap;
         private volatile SortBy sortBy;
         private volatile SortOrder sortOrder;
         private Map<Integer, Comment> commentIDMap;
@@ -156,30 +120,24 @@ public class CommentRepositoryImpl implements CommentRepository {
             commentIDMap = new ConcurrentHashMap<>();
             this.sortBy = SortBy.LIKES;
             this.sortOrder = SortOrder.DESC;
-            this.updateInProcess = false;
-            this.maxRank = -1;
+            this.slab = 0;
         }
-        synchronized Observable<Comment> putIfAbsent(int rank, Observable<Comment> commentObservable) {
-            if(null == commentRankMap.putIfAbsent(rank, commentObservable)) {
-                commentObservable.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(comment -> commentIDMap.put(comment.getCommentId(), comment), new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("CommentRepo", throwable.toString());
-                    }
-                });
-            }
-            maxRank = Math.max(rank, maxRank);
-            return commentRankMap.get(rank);
+
+        Observable<List<Comment>> getComments(int slabId) {
+            return Observable.create((Observable.OnSubscribe<List<Comment>>) subscriber -> dataRetriever.getCommentsForQuestion(question.getQuestionId(), slabId*10, 10, userID, sortBy.name(), sortOrder.name()).
+                    subscribe(subscriber)).
+                    doOnNext(list -> list.forEach(comment -> commentIDMap.put(comment.getCommentId(), comment))).
+                    doOnNext(list -> slab = Math.max(slab, slabId + 1)).
+                    subscribeOn(Schedulers.io()).
+                    observeOn(AndroidSchedulers.mainThread()).
+                    cache();
         }
 
         public synchronized void clear() {
             this.sortBy = null;
             this.sortOrder = null;
             this.commentRankMap = new ConcurrentHashMap<>();
-            this.updateInProcess = false;
-            this.maxRank = -1;
+            this.slab = 0;
         }
         synchronized void updateType(SortOrder sortOrder, SortBy sortBy, int questionID) {
             this.sortBy = sortBy;
@@ -197,6 +155,21 @@ public class CommentRepositoryImpl implements CommentRepository {
         }
         synchronized SortBy getSortBy() {
             return this.sortBy;
+        }
+
+        synchronized Observable<Comment> kthComment(final int rank) {
+            final int mapIndex = rank/10;
+            final int localIndex = rank%10;
+            final Observable<List<Comment>> commentObservable = getComments(mapIndex);
+            commentRankMap.putIfAbsent(mapIndex, commentObservable);
+            return commentRankMap.get(mapIndex).map(list -> list.get(localIndex));
+        }
+
+        synchronized void ensureMoreComments(Action0 onCompleted) {
+            int currentSlabId = this.slab;
+            final Observable<List<Comment>> questionObservable = getComments(currentSlabId);
+            commentRankMap.putIfAbsent(currentSlabId, questionObservable);
+            commentRankMap.get(currentSlabId).subscribe(a -> {}, e -> {}, onCompleted);
         }
 
         synchronized Optional<Comment> getComment(final int id) {

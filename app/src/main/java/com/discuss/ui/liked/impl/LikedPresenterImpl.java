@@ -35,7 +35,7 @@ public class LikedPresenterImpl implements LikedPresenter {
 
     @Override
     public void update(Action0 onCompletedAction) {
-        likedQuestionsRepository.ensureKMoreQuestions(10, onCompletedAction);
+        likedQuestionsRepository.ensureKMoreQuestions(onCompletedAction);
     }
 
     @Override

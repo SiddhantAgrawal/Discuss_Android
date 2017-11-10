@@ -35,7 +35,7 @@ public class BookMarkPresenterImpl implements BookMarkPresenter {
 
     @Override
     public void update(Action0 onCompletedAction) {
-        bookMarkRepository.ensureKMoreQuestions(10, onCompletedAction);
+        bookMarkRepository.ensureKMoreQuestions(onCompletedAction);
     }
 
     @Override

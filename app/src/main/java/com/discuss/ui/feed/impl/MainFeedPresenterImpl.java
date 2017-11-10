@@ -43,7 +43,7 @@ public class MainFeedPresenterImpl implements MainFeedPresenter {
 
     @Override
     public void update(Action0 onCompletedAction) {
-        questionRepository.ensureKMoreQuestions(10, onCompletedAction);
+        questionRepository.ensureKMoreQuestions(onCompletedAction);
     }
 
     @Override

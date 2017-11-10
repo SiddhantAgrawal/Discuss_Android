@@ -46,7 +46,7 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter<Comment>
 
     @Override
     public void update(Action0 onCompletedAction) {
-        commentRepository.ensureKMoreComments(10, onCompletedAction);
+        commentRepository.ensureKMoreComments(onCompletedAction);
     }
 
     @Override

@@ -1,22 +1,18 @@
 package com.discuss.data.impl;
 
-import android.util.Log;
-import android.util.Pair;
-
 import com.discuss.data.DataRetriever;
 import com.discuss.data.QuestionsAnsweredRepository;
 import com.discuss.data.StateDiff;
 import com.discuss.datatypes.Question;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -24,55 +20,67 @@ import rx.schedulers.Schedulers;
  * @author Deepak Thakur
  */
 public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredRepository {
-
     private final DataRetriever dataRetriever;
     private final StateDiff stateDiff;
     private final int userID;
     private final QuestionsAnsweredRepositoryImpl.State state;
+
     private final class State {
-        private volatile boolean updateInProcess;
-        private volatile int maxRank;
-        private Map<Integer, Observable<Question>> questionRankMap;
+        private volatile int slab;
+        private Map<Integer, Observable<List<Question>>> questionRankMap;
         private Map<Integer, Question> questionIDMap;
+
         State() {
             this.questionRankMap = new ConcurrentHashMap<>();
-            questionIDMap = new ConcurrentHashMap<>();
-            this.updateInProcess = false;
-            this.maxRank = -1;
+            this.questionIDMap = new ConcurrentHashMap<>();
+            this.slab = 0;
         }
-        synchronized Observable<Question> putIfAbsent(int rank, Observable<Question> questionObservable) {
-            if(null == questionRankMap.putIfAbsent(rank, questionObservable)){
-                questionObservable.subscribe(question -> questionIDMap.put(question.getQuestionId(), question), new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("quesAnsweredRepo", throwable.toString());
-                    }
-                });
-            }
-            maxRank = Math.max(rank, maxRank);
-            questionObservable.doOnNext(question -> questionIDMap.put(question.getQuestionId(), question));
-            return questionRankMap.get(rank);
+
+        Observable<List<Question>> getQuestions(int slabId) {
+            return Observable.create((Observable.OnSubscribe<List<Question>>) subscriber -> dataRetriever.getCommentedQuestions(slabId*10, 10, userID).
+                    subscribe(subscriber)).doOnNext(list -> list.forEach(question -> questionIDMap.put(question.getQuestionId(), question))).
+                    doOnNext(list -> slab = Math.max(slab, slabId + 1)).
+                    subscribeOn(Schedulers.io()).
+                    observeOn(AndroidSchedulers.mainThread()).
+                    cache();
+        }
+
+        synchronized Observable<Question> kthQuestion(final int rank) {
+            final int mapIndex = rank/10;
+            final int localIndex = rank%10;
+            final Observable<List<Question>> questionObservable = getQuestions(mapIndex);
+            questionRankMap.putIfAbsent(mapIndex, questionObservable);
+            return questionRankMap.get(mapIndex).map(list -> list.get(localIndex));
+        }
+
+        synchronized void ensureMoreQuestions(Action0 onCompleted) {
+            int currentSlabId = this.slab;
+            final Observable<List<Question>> questionObservable = getQuestions(currentSlabId);
+            questionRankMap.putIfAbsent(currentSlabId, questionObservable);
+            questionRankMap.get(currentSlabId).subscribe(a -> {}, e -> {}, onCompleted);
         }
 
         public synchronized void clear() {
             this.questionRankMap = new ConcurrentHashMap<>();
-            this.updateInProcess = false;
-            this.maxRank = -1;
-            QuestionsAnsweredRepositoryImpl.this.stateDiff.flushAll();
+            this.slab = 0;
+            //stateDiff.flushAll();
         }
+
         synchronized void updateType() {
-            this.updateInProcess = false;
+            this.slab = 0;
             this.questionRankMap = new ConcurrentHashMap<>();
-            QuestionsAnsweredRepositoryImpl.this.stateDiff.flushAll();
+            //stateDiff.flushAll();
         }
 
         synchronized Optional<Question> getQuestion(final int id) {
             return Optional.ofNullable(questionIDMap.get(id));
         }
+
         synchronized void putInCachedQuestions(Question question) {
             questionIDMap.put(question.getQuestionId(), question);
         }
     }
+
     public QuestionsAnsweredRepositoryImpl(DataRetriever dataRetriever,
                                         StateDiff stateDiff,
                                         final int userID) {
@@ -84,26 +92,24 @@ public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredReposit
 
 
     @Override
-    public Observable<Question> kthQuestion(int kth) {
-        return this.state.putIfAbsent(kth, dataRetriever.kthCommentedQuestion(kth, userID).cache());
+    public synchronized Observable<Question> kthQuestion(final int kth) {
+        return this.state.kthQuestion(kth);
     }
 
     @Override
     public Observable<Question> getQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
         return question.map(Observable::just)
-                .orElseGet(() -> dataRetriever.getQuestion(questionID, userID)
+                .orElseGet(() -> dataRetriever.kthCommentedQuestion(questionID, userID)
                         .doOnNext(this.state::putInCachedQuestions)
-                        .cache())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread());
+                        .cache());
 
     }
 
     @Override
     public Observable<Boolean> likeQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
-        if(question.isPresent()) {
+        if (question.isPresent()) {
             Question question1 = question.get();
             question1.setLiked(true);
         }
@@ -114,7 +120,7 @@ public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredReposit
     @Override
     public Observable<Boolean> unlikeQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
-        if(question.isPresent()) {
+        if (question.isPresent()) {
             Question question1 = question.get();
             question1.setLiked(false);
         }
@@ -125,7 +131,7 @@ public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredReposit
     @Override
     public Observable<Boolean> bookmarkQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
-        if(question.isPresent()) {
+        if (question.isPresent()) {
             Question question1 = question.get();
             question1.setBookmarked(false);
         }
@@ -136,7 +142,7 @@ public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredReposit
     @Override
     public Observable<Boolean> unbookmarkQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
-        if(question.isPresent()) {
+        if (question.isPresent()) {
             Question question1 = question.get();
             question1.setBookmarked(false);
         }
@@ -145,44 +151,17 @@ public class QuestionsAnsweredRepositoryImpl implements QuestionsAnsweredReposit
     }
 
     public int estimatedSize() {
-        return this.state.maxRank;
+        return this.state.slab * 10;
     }
 
     @Override
     public void init(Action0 onCompleted) {
         this.state.updateType();
-        ensureKMoreQuestions(10, onCompleted);
+        ensureKMoreQuestions(onCompleted);
     }
 
     @Override
-    public synchronized void ensureKMoreQuestions(int k, Action0 onCompleted) {
-        if(this.state.updateInProcess) {
-            onCompleted.call();
-            return;
-        }
-        this.state.updateInProcess = true;
-        int offset = this.state.maxRank + 1;
-        dataRetriever.getCommentedQuestions(offset, k, userID)
-                .flatMap(Observable::from)
-                .zipWith(Observable.range(offset, k), (question, id) -> new Pair<Integer, Question>(id, question))
-                .cache()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Pair<Integer, Question>>() {
-                    @Override
-                    public void onCompleted() {
-                        QuestionsAnsweredRepositoryImpl.this.state.updateInProcess = false;
-                        onCompleted.call();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onNext(Pair<Integer, Question> rankQuestionPair) {
-                        QuestionsAnsweredRepositoryImpl.this.state.putIfAbsent(rankQuestionPair.first, Observable.just(rankQuestionPair.second).cache());
-                    }
-                });
+    public synchronized void ensureKMoreQuestions(Action0 onCompleted) {
+        this.state.ensureMoreQuestions(onCompleted);
     }
 }

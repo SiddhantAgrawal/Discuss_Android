@@ -22,7 +22,7 @@ public interface BookMarkRepository {
 
     Observable<Boolean> unbookmarkQuestionWithID(final int questionID);
 
-    void ensureKMoreQuestions(int k, Action0 onCompleted);
+    void ensureKMoreQuestions(Action0 onCompleted);
 
     int estimatedSize();
 

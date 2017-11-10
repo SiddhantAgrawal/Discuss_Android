@@ -34,10 +34,12 @@ import com.discuss.ui.commented.impl.CommentedQuestionFragment;
 import com.discuss.ui.liked.impl.LikedQuestionsFragment;
 import com.discuss.ui.bookmark.impl.BookMarkFragment;
 import com.discuss.ui.feed.MainFeedPresenter;
+import com.discuss.utils.Command;
 import com.discuss.utils.EndlessScrollListener;
 import com.discuss.ui.question.post.impl.AskQuestionView;
 import com.discuss.ui.question.view.QuestionView;
 import com.example.siddhantagrawal.check_discuss.R;
+import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
 
@@ -139,7 +141,12 @@ public class MainActivity extends AppCompatActivity {
             listview = (ListView) findViewById(R.id.listview);
             adapter = new QuestionViewAdapter(MainActivity.this, mainFeedPresenter);
             listview.setAdapter(adapter);
-            listview.setOnScrollListener(new EndlessScrollListener(() -> mainFeedPresenter.update(() -> adapter.notifyDataSetChanged()), 4));
+            listview.setOnScrollListener(new EndlessScrollListener(new Command() {
+                @Override
+                public void execute() {
+                    mainFeedPresenter.update(() -> adapter.notifyDataSetChanged());
+                }
+            }, 4));
             mProgressDialog.dismiss();
         });
     }
@@ -225,7 +232,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public View getView(final int position, View convertView, ViewGroup parent) {
-
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -241,6 +247,10 @@ public class MainActivity extends AppCompatActivity {
             likes.setText(Integer.toString(question.getLikes()));
             postedBy.setText(question.getUserName());
             difficulty.setText(question.getDifficulty());
+            ImageView image = itemView.findViewById(R.id.question_short_image);
+            if(null != question.getImageUrl()) {
+                Picasso.with(context).load(question.getImageUrl()).into(image);
+            }
             ImageView imageView = itemView.findViewById(R.id.question_short_like_button);
             if (question.isLiked())
                 imageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.liked));
