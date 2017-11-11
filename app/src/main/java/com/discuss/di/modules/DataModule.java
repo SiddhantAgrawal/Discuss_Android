@@ -43,7 +43,7 @@ public class DataModule {
     @Provides
     @Named("server_end_point")
     public String providesEndpoint() {
-        return "http://10.14.125.250:8070/";
+        return "http://192.168.122.1:8070/";
     }
 
 

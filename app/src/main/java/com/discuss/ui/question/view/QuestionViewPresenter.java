@@ -1,6 +1,10 @@
 package com.discuss.ui.question.view;
 
+import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
+import com.discuss.ui.CommentPresenter;
+import com.discuss.ui.QuestionPresenter;
+import com.discuss.ui.QuestionSummary;
 
 import rx.Observable;
 import rx.functions.Action0;
@@ -9,7 +13,7 @@ import rx.functions.Action0;
  * @author Deepak Thakur
  *
  */
-public interface QuestionViewPresenter<T> {
+public interface QuestionViewPresenter extends QuestionPresenter, CommentPresenter {
 
     void init(Action0 action0, int questionID);
 
@@ -17,9 +21,9 @@ public interface QuestionViewPresenter<T> {
 
     Observable<Boolean> refresh();
 
-    Observable<T> getComment(int position);
+    Observable<Comment> getComment(int position);
 
     int size();
 
-    Observable<Question> getQuestion();
+    Observable<QuestionSummary> getQuestion();
 }

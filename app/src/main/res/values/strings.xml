@@ -10,11 +10,13 @@
     <string name="action_settings">"action_settings"</string>
     <string name="ask_question">Ask Question</string>
     <string name="tag">Tag</string>
-    <string name="views">"views "</string>
-    <string name="difficulty">"difficulty "</string>
+    <string name="views">"Views"</string>
+    <string name="difficulty">"Difficulty : "</string>
     <string name="posted_by">"posted by "</string>
     <string name="choose_image">choose Image</string>
     <string name="save">save</string>
+    <string name="asked_by">Asked by</string>
+    <string name="answered_by">Answered by</string>
     <string-array name="titles">
         <item>BookMarks</item>
         <item>Questions Liked</item>

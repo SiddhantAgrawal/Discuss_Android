@@ -1,5 +1,6 @@
 package com.discuss.ui.feed.impl;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
@@ -28,7 +29,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.discuss.DiscussApplication;
-import com.discuss.datatypes.Question;
+import com.discuss.ui.BookMarkState;
+import com.discuss.ui.LikeState;
+import com.discuss.ui.QuestionSummary;
 import com.discuss.ui.category.CategorySelector;
 import com.discuss.ui.commented.impl.CommentedQuestionFragment;
 import com.discuss.ui.liked.impl.LikedQuestionsFragment;
@@ -38,6 +41,7 @@ import com.discuss.utils.Command;
 import com.discuss.utils.EndlessScrollListener;
 import com.discuss.ui.question.post.impl.AskQuestionView;
 import com.discuss.ui.question.view.QuestionView;
+import com.discuss.utils.UIUtil;
 import com.example.siddhantagrawal.check_discuss.R;
 import com.squareup.picasso.Picasso;
 
@@ -231,57 +235,59 @@ public class MainActivity extends AppCompatActivity {
             return 0;
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         public View getView(final int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            View itemView = inflater.inflate(R.layout.question_short, parent, false); /* TODO(Deepak): See if this has performance issues */
-            final Question question = mainFeedPresenter.get(position).toBlocking().first();
+            View itemView = inflater.inflate(R.layout.question_short, parent, false);
+            final QuestionSummary questionSummary = mainFeedPresenter.get(position).toBlocking().first();
 
-            TextView questionText = (TextView) itemView.findViewById(R.id.question_short_question);
-            TextView likes = (TextView) itemView.findViewById(R.id.question_short_like_value);
-            TextView postedBy = (TextView) itemView.findViewById(R.id.question_short_postedby_value);
-            TextView difficulty = (TextView) itemView.findViewById(R.id.question_short_difficulty_value);
+            UIUtil.setTextView(itemView, R.id.question_short_question, questionSummary.getText());
+            UIUtil.setTextView(itemView, R.id.question_short_like_value, Integer.toString(questionSummary.getLikes()));
+            UIUtil.setTextView(itemView, R.id.question_short_difficulty_value, questionSummary.getDifficulty());
+            UIUtil.setTextView(itemView, R.id.question_short_view_value, Integer.toString(questionSummary.getViews()));
+            UIUtil.setImageView(context, itemView, R.id.question_short_image, questionSummary.getImageUrl());
 
-            questionText.setText(question.getText());
-            likes.setText(Integer.toString(question.getLikes()));
-            postedBy.setText(question.getUserName());
-            difficulty.setText(question.getDifficulty());
-            ImageView image = itemView.findViewById(R.id.question_short_image);
-            if(null != question.getImageUrl()) {
-                Picasso.with(context).load(question.getImageUrl()).into(image);
-            }
-            ImageView imageView = itemView.findViewById(R.id.question_short_like_button);
-            if (question.isLiked())
-                imageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.liked));
-            else
-                imageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.like_icon));
-            final boolean questionOrigionallyLiked = question.isLiked();
-            imageView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                        if (question.isLiked()) {
-                            imageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.like_icon));
-                            if (questionOrigionallyLiked)
-                                likes.setText(Integer.toString(question.getLikes() - 1));
-                            else
-                                likes.setText(Integer.toString(question.getLikes()));
-                        } else {
-                            imageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.liked));
-                            if (!questionOrigionallyLiked)
-                                likes.setText(Integer.toString(question.getLikes() + 1));
-                            else
-                                likes.setText(Integer.toString(question.getLikes()));
-                        }
-                        question.setLiked(!question.isLiked());
-                    }
-                    return true;
+            ImageView likeImage = itemView.findViewById(R.id.question_short_like);
+            TextView textView = itemView.findViewById(R.id.question_short_like_value);
+
+            final LikeState likeState = new LikeState(questionSummary.getQuestionId(),
+                    questionSummary.getLikes(),
+                    questionSummary.isLiked(),
+                    likeImage,
+                    textView,
+                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.like_icon),
+                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.liked),
+                    mainFeedPresenter);
+
+            likeImage.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    likeState.pressUpdate();
                 }
+                return true;
             });
+
+            ImageView bookmarkImage = itemView.findViewById(R.id.question_short_bookmark);
+
+            final BookMarkState bookMarkState = new BookMarkState(questionSummary.getQuestionId(),
+                    questionSummary.isBookmarked(),
+                    bookmarkImage,
+                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.bookmark),
+                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.bookmark),
+                    mainFeedPresenter);
+
+            bookmarkImage.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    bookMarkState.pressUpdate();
+                }
+                return true;
+            });
+
+
             itemView.setOnClickListener(arg0 -> {
                 Intent intent = new Intent(context, QuestionView.class);
-                intent.putExtra("questionId", question.getQuestionId());
+                intent.putExtra("questionId", questionSummary.getQuestionId());
                 context.startActivity(intent);
             });
             return itemView;

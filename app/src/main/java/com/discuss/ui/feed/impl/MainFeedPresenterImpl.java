@@ -7,6 +7,7 @@ import com.discuss.data.QuestionRepository;
 import com.discuss.data.SortBy;
 import com.discuss.data.SortOrder;
 import com.discuss.datatypes.Question;
+import com.discuss.ui.QuestionSummary;
 import com.discuss.ui.feed.MainFeedPresenter;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -53,13 +55,49 @@ public class MainFeedPresenterImpl implements MainFeedPresenter {
     }
 
     @Override
-    public Observable<Question> get(int kth) {
-        return questionRepository.kthQuestion(kth, sortBy, sortOrder);
+    public Observable<QuestionSummary> get(int kth) {
+        return questionRepository.kthQuestion(kth, sortBy, sortOrder).map(new Func1<Question, QuestionSummary>() {
+            @Override
+            public QuestionSummary call(Question question) {
+                return new QuestionSummary.QuestionSummaryBuilder()
+                        .setQuestionId(question.getQuestionId())
+                        .setDifficulty(question.getDifficulty())
+                        .setImageUrl(question.getImageUrl())
+                        .setText(question.getText())
+                        .setLikes(question.getLikes())
+                        .setViews(question.getViews())
+                        .setLiked(question.isLiked())
+                        .setBookmarked(question.isBookmarked())
+                        .setUserId(question.getUserId())
+                        .setUserName(question.getUserName())
+                        .build();
+            }
+        });
     }
 
     @Override
     public int size() {
         return questionRepository.estimatedSize();
+    }
+
+    @Override
+    public Observable<Boolean> likeQuestionWithID(int questionID) {
+        return questionRepository.likeQuestionWithID(questionID);
+    }
+
+    @Override
+    public Observable<Boolean> unlikeQuestionWithID(int questionID) {
+        return questionRepository.unlikeQuestionWithID(questionID);
+    }
+
+    @Override
+    public Observable<Boolean> bookmarkQuestionWithID(int questionID) {
+        return questionRepository.bookmarkQuestionWithID(questionID);
+    }
+
+    @Override
+    public Observable<Boolean> unbookmarkQuestionWithID(int questionID) {
+        return questionRepository.unbookmarkQuestionWithID(questionID);
     }
 
 }

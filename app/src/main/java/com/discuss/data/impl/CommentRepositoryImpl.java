@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
@@ -92,9 +93,12 @@ public class CommentRepositoryImpl implements CommentRepository {
 
     @Override
     public void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID) {
+        Log.e("commentRepo", "inside init");
         this.state.updateType(sortOrder, sortBy, questionID);
         ensureKMoreComments(onCompleted);
     }
+
+
 
 
     public synchronized void ensureKMoreComments(Action0 onCompleted) {
@@ -103,12 +107,11 @@ public class CommentRepositoryImpl implements CommentRepository {
 
     @Override
     public int estimatedSize() {
-        return this.state.maxRank;
+        return this.state.slab*10;
     }
 
     private final class State {
         private volatile int slab;
-        private volatile int maxRank;
         private Map<Integer, Observable<List<Comment>>> commentRankMap;
         private volatile SortBy sortBy;
         private volatile SortOrder sortOrder;
@@ -124,10 +127,15 @@ public class CommentRepositoryImpl implements CommentRepository {
         }
 
         Observable<List<Comment>> getComments(int slabId) {
-            return Observable.create((Observable.OnSubscribe<List<Comment>>) subscriber -> dataRetriever.getCommentsForQuestion(question.getQuestionId(), slabId*10, 10, userID, sortBy.name(), sortOrder.name()).
-                    subscribe(subscriber)).
-                    doOnNext(list -> list.forEach(comment -> commentIDMap.put(comment.getCommentId(), comment))).
+            return Observable.create(new Observable.OnSubscribe<List<Comment>>() {
+                @Override
+                public void call(Subscriber<? super List<Comment>> subscriber) {
+                    dataRetriever.getCommentsForQuestion(question.getQuestionId(), slabId * 10, 10, userID, sortBy.name(), sortOrder.name()).
+                            subscribe(subscriber);
+                }
+            }).doOnNext(list -> list.forEach(comment -> commentIDMap.put(comment.getCommentId(), comment))).
                     doOnNext(list -> slab = Math.max(slab, slabId + 1)).
+                    doOnNext(l -> Log.e("commentRepo", "in on next")).
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).
                     cache();
@@ -143,7 +151,7 @@ public class CommentRepositoryImpl implements CommentRepository {
             this.sortBy = sortBy;
             this.sortOrder = sortOrder;
             this.commentRankMap = new ConcurrentHashMap<>();
-            this.maxRank = -1;
+            this.slab = 0;
             this.question = CommentRepositoryImpl.this
                     .questionRepository
                     .getQuestionWithID(questionID)
@@ -166,6 +174,7 @@ public class CommentRepositoryImpl implements CommentRepository {
         }
 
         synchronized void ensureMoreComments(Action0 onCompleted) {
+            Log.e("CommentRepo", "inside the ensure");
             int currentSlabId = this.slab;
             final Observable<List<Comment>> questionObservable = getComments(currentSlabId);
             commentRankMap.putIfAbsent(currentSlabId, questionObservable);

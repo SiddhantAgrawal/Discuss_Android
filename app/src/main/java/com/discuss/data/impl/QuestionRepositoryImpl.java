@@ -24,6 +24,12 @@ import rx.schedulers.Schedulers;
 /**
  *
  * @author Deepak Thakur
+ *
+ * Implementation Detail :
+ * Same instance of Question is shared between questionRankMap and questionIDMap.
+ * This is important because the upadate in one of them should be reflected in other.
+ *
+ * @todo(deepak): make question thread safe
  */
 public class QuestionRepositoryImpl implements QuestionRepository {
     private final DataRetriever dataRetriever;
