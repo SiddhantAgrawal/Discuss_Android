@@ -3,6 +3,7 @@ package com.discuss.ui.question.view;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.ui.CommentPresenter;
+import com.discuss.ui.CommentSummary;
 import com.discuss.ui.QuestionPresenter;
 import com.discuss.ui.QuestionSummary;
 
@@ -17,11 +18,11 @@ public interface QuestionViewPresenter extends QuestionPresenter, CommentPresent
 
     void init(Action0 action0, int questionID);
 
-    void update(Action0 onCompletedAction);
+    void update(Action0 onCompletedAction, Action0 onNoUpdate);
 
     Observable<Boolean> refresh();
 
-    Observable<Comment> getComment(int position);
+    Observable<CommentSummary> getComment(int position);
 
     int size();
 

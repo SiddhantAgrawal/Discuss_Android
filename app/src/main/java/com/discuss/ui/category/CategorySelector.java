@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.discuss.DiscussApplication;
-import com.discuss.datatypes.UserCategoryPreference;
+import com.discuss.datatypes.PersonCategoryPreference;
 import com.discuss.ui.View;
 import com.example.siddhantagrawal.check_discuss.R;
 
@@ -97,11 +97,11 @@ public class CategorySelector extends AppCompatActivity implements View {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             android.view.View tagEntity = inflater.inflate(R.layout.tag_entity, parent, false);
-            final UserCategoryPreference userCategoryPreference = categorySelectorPresenter.get(position).toBlocking().first();
+            final PersonCategoryPreference personCategoryPreferences = categorySelectorPresenter.get(position).toBlocking().first();
             TextView questionText = (TextView) tagEntity.findViewById(R.id.tag_entity_category);
             CheckBox checkBox = (CheckBox) tagEntity.findViewById(R.id.tag_entity_pref);
-            questionText.setText(userCategoryPreference.getCategory().name());
-            checkBox.setChecked(userCategoryPreference.getPreferred());
+            questionText.setText(personCategoryPreferences.getCategory().name());
+            checkBox.setChecked(personCategoryPreferences.getPreferred());
 
             return tagEntity;
         }

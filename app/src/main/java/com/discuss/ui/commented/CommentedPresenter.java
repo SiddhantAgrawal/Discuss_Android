@@ -1,6 +1,8 @@
 package com.discuss.ui.commented;
 
 import com.discuss.datatypes.Question;
+import com.discuss.ui.QuestionPresenter;
+import com.discuss.ui.QuestionSummary;
 
 import java.io.Serializable;
 
@@ -15,10 +17,10 @@ import rx.functions.Action0;
  *
  */
 
-public interface CommentedPresenter {
+public interface CommentedPresenter extends QuestionPresenter {
     void init(Action0 onCompletedAction);
     void update(Action0 onCompletedAction);
     Observable<Boolean> refresh();
-    Observable<Question> get(int position);
+    Observable<QuestionSummary> get(int position);
     int size();
 }

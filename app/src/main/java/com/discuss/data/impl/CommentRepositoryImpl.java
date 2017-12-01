@@ -92,22 +92,44 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
+    public Observable<Comment> userAddedComment(final int questionID) {
+        if (this.state.question != null &&
+                this.state.question.getQuestionId() == questionID) {
+            return this.state.userAddedComment();
+        } else {
+            this.state.updateType(this.state.sortOrder, this.state.sortBy, questionID);
+            return this.state.userAddedComment();
+        }
+    }
+
+    @Override
     public void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID) {
         Log.e("commentRepo", "inside init");
         this.state.updateType(sortOrder, sortBy, questionID);
-        ensureKMoreComments(onCompleted);
+        ensureKMoreComments(onCompleted, () -> {});
     }
 
 
 
-
-    public synchronized void ensureKMoreComments(Action0 onCompleted) {
-        this.state.ensureMoreComments(onCompleted);
+    @Override
+    public synchronized void ensureKMoreComments(Action0 onCompleted, Action0 onNoUpdate) {
+        this.state.ensureMoreComments(onCompleted, onNoUpdate);
     }
 
     @Override
     public int estimatedSize() {
-        return this.state.slab*10;
+        return this.state.size;
+    }
+
+    @Override
+    public void updateCommentText(int commentID, String text) {
+        this.state.updateCommentText(commentID, text);
+        this.stateDiff.updateCommentText(commentID, text);
+    }
+
+    @Override
+    public boolean isFurtherLoadingPossible() {
+        return this.state.isFurtherLoadingPossible();
     }
 
     private final class State {
@@ -117,6 +139,9 @@ public class CommentRepositoryImpl implements CommentRepository {
         private volatile SortOrder sortOrder;
         private Map<Integer, Comment> commentIDMap;
         private volatile Question question;
+        private volatile Observable<Comment> userComment;
+        private volatile int size;
+        private volatile boolean isFurtherLoadingPossible;
 
         State() {
             this.commentRankMap = new ConcurrentHashMap<>();
@@ -124,6 +149,13 @@ public class CommentRepositoryImpl implements CommentRepository {
             this.sortBy = SortBy.LIKES;
             this.sortOrder = SortOrder.DESC;
             this.slab = 0;
+            this.size = 0;
+            this.isFurtherLoadingPossible = true;
+            this.userComment = null;
+        }
+
+        synchronized boolean isFurtherLoadingPossible() {
+            return this.isFurtherLoadingPossible;
         }
 
         Observable<List<Comment>> getComments(int slabId) {
@@ -135,7 +167,8 @@ public class CommentRepositoryImpl implements CommentRepository {
                 }
             }).doOnNext(list -> list.forEach(comment -> commentIDMap.put(comment.getCommentId(), comment))).
                     doOnNext(list -> slab = Math.max(slab, slabId + 1)).
-                    doOnNext(l -> Log.e("commentRepo", "in on next")).
+                    doOnNext(list -> size += list.size()).
+                    doOnNext(list -> isFurtherLoadingPossible = (list.size() == 10)).
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).
                     cache();
@@ -146,17 +179,23 @@ public class CommentRepositoryImpl implements CommentRepository {
             this.sortOrder = null;
             this.commentRankMap = new ConcurrentHashMap<>();
             this.slab = 0;
+            this.size = 0;
+            this.isFurtherLoadingPossible = true;
+            this.userComment = null;
         }
         synchronized void updateType(SortOrder sortOrder, SortBy sortBy, int questionID) {
             this.sortBy = sortBy;
             this.sortOrder = sortOrder;
             this.commentRankMap = new ConcurrentHashMap<>();
             this.slab = 0;
+            this.size = 0;
+            this.isFurtherLoadingPossible = true;
             this.question = CommentRepositoryImpl.this
                     .questionRepository
                     .getQuestionWithID(questionID)
                     .toBlocking()
                     .first();
+            this.userComment = dataRetriever.getUserAddedComment(questionID, userID).first().cache();
         }
         synchronized SortOrder getSortOrder() {
             return this.sortOrder;
@@ -170,10 +209,14 @@ public class CommentRepositoryImpl implements CommentRepository {
             final int localIndex = rank%10;
             final Observable<List<Comment>> commentObservable = getComments(mapIndex);
             commentRankMap.putIfAbsent(mapIndex, commentObservable);
-            return commentRankMap.get(mapIndex).map(list -> list.get(localIndex));
+            return commentRankMap.get(mapIndex).map(list -> list.size() > 0 ? list.get(localIndex) : null);
         }
 
-        synchronized void ensureMoreComments(Action0 onCompleted) {
+        synchronized void ensureMoreComments(Action0 onCompleted, Action0 onNoUpdate) {
+            if (!this.isFurtherLoadingPossible) {
+               onNoUpdate.call();
+               return;
+            }
             Log.e("CommentRepo", "inside the ensure");
             int currentSlabId = this.slab;
             final Observable<List<Comment>> questionObservable = getComments(currentSlabId);
@@ -184,9 +227,19 @@ public class CommentRepositoryImpl implements CommentRepository {
         synchronized Optional<Comment> getComment(final int id) {
             return Optional.ofNullable(commentIDMap.get(id));
         }
+
         synchronized void putInCachedComments(Comment comment) {
             commentIDMap.put(comment.getCommentId(), comment);
         }
+
+        public Observable<Comment> userAddedComment() {
+            return userComment;
+        }
+
+        public void updateCommentText(int commentID, String text) {
+            this.userComment.toBlocking().first().setText(text);
+        }
+
     }
 
 }

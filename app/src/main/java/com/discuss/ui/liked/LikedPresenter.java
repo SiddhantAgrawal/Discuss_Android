@@ -1,6 +1,8 @@
 package com.discuss.ui.liked;
 
 import com.discuss.datatypes.Question;
+import com.discuss.ui.QuestionPresenter;
+import com.discuss.ui.QuestionSummary;
 
 import java.io.Serializable;
 
@@ -15,7 +17,7 @@ import rx.functions.Action0;
  *
  */
 
-public interface LikedPresenter {
+public interface LikedPresenter extends QuestionPresenter {
 
     void init(Action0 onCompletedAction);
 
@@ -23,7 +25,7 @@ public interface LikedPresenter {
 
     Observable<Boolean> refresh();
 
-    Observable<Question> get(int position);
+    Observable<QuestionSummary> get(int position);
 
     int size();
 }

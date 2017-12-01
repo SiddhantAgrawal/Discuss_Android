@@ -1,7 +1,7 @@
 package com.discuss.ui.category;
 
 import com.discuss.data.DataRetriever;
-import com.discuss.datatypes.UserCategoryPreference;
+import com.discuss.datatypes.PersonCategoryPreference;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -18,10 +18,10 @@ import rx.schedulers.Schedulers;
 
 public class CategorySelectorPresenterImpl implements CategorySelectorPresenter {
     private final DataRetriever dataRetriever;
-    private List<UserCategoryPreference> userCategoryPreferences;
+    private List<PersonCategoryPreference> personCategoryPreferences;
     private int limit;
     private volatile boolean isLoading;
-    private Observable<List<UserCategoryPreference>> questionObservable;
+    private Observable<List<PersonCategoryPreference>> questionObservable;
     private final ReentrantLock lock = new ReentrantLock();
 
     @Inject
@@ -30,7 +30,7 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
     }
 
     private void checkPreConditions() {
-        if (null == dataRetriever || null == userCategoryPreferences) {
+        if (null == dataRetriever || null == personCategoryPreferences) {
             init(onCompleted);
         }
     }
@@ -50,10 +50,10 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
         }));
     }
 
-    private final Action1<List<UserCategoryPreference>> onNextQuestionsList = new Action1<List<UserCategoryPreference>>() {
+    private final Action1<List<PersonCategoryPreference>> onNextQuestionsList = new Action1<List<PersonCategoryPreference>>() {
         @Override
-        public void call(List<UserCategoryPreference> fetchedQuestions) {
-            userCategoryPreferences.addAll(fetchedQuestions);
+        public void call(List<PersonCategoryPreference> fetchedQuestions) {
+            personCategoryPreferences.addAll(fetchedQuestions);
         }
     };
 
@@ -64,7 +64,7 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
 
     @Override
     public void init(Action0 onCompletedAction) {
-        userCategoryPreferences = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
+        personCategoryPreferences = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
         limit = 10;
         synchronized (lock) {
             if (!isLoading) {
@@ -82,13 +82,13 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
     }
 
     @Override
-    public Observable<UserCategoryPreference> get(int position) {
-        return Observable.just(userCategoryPreferences.get(position));
+    public Observable<PersonCategoryPreference> get(int position) {
+        return Observable.just(personCategoryPreferences.get(position));
 
     }
 
     @Override
     public int size() {
-        return (null == userCategoryPreferences) ? 0 : userCategoryPreferences.size();
+        return (null == personCategoryPreferences) ? 0 : personCategoryPreferences.size();
     }
 }

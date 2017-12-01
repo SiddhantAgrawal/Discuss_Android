@@ -13,18 +13,20 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.discuss.DiscussApplication;
-import com.discuss.datatypes.Comment;
-import com.discuss.datatypes.Question;
 import com.discuss.ui.BookMarkState;
+import com.discuss.ui.CommentLikeState;
+import com.discuss.ui.CommentSummary;
 import com.discuss.ui.LikeState;
 import com.discuss.ui.QuestionLikeState;
 import com.discuss.ui.QuestionSummary;
-import com.discuss.ui.feed.impl.MainActivity;
+import com.discuss.ui.comment.post.UserCommentPost;
+import com.discuss.ui.comment.view.UserComment;
 import com.discuss.utils.Command;
 import com.discuss.utils.EndlessScrollListener;
 import com.discuss.utils.UIUtil;
@@ -70,7 +72,7 @@ public class QuestionView extends Activity {
                     @Override
                     public void execute() {
                         Log.e("QuestionView", "in execute");
-                        questionViewPresenter.update(() -> adapter.notifyDataSetChanged());
+                        questionViewPresenter.update(() -> adapter.notifyDataSetChanged(), () -> {});
                     }
                 }, 4));
                 mProgressDialog.dismiss();
@@ -92,7 +94,8 @@ public class QuestionView extends Activity {
 
         @Override
         public int getCount() {
-            return questionViewPresenter.size();
+            Log.e("QuesV", "count is " + questionViewPresenter.size() + 1);
+            return questionViewPresenter.size() + 1;
         }
 
         @Override
@@ -112,23 +115,19 @@ public class QuestionView extends Activity {
 
                 View itemView = inflater.inflate(R.layout.question_complete, parent, false);
 
-                TextView textViewForQuestion = (TextView) itemView.findViewById(R.id.question_complete_question);
-                TextView textViewForLikes = (TextView) itemView.findViewById(R.id.question_complete_like_value);
-                TextView textViewForPostedBy = (TextView) itemView.findViewById(R.id.question_complete_postedby_value);
-                TextView textViewForDifficultyLevel = (TextView) itemView.findViewById(R.id.question_complete_difficulty_value);
-
                 questionViewPresenter.getQuestion().subscribe(new Action1<QuestionSummary>() {
                     @Override
                     public void call(QuestionSummary questionSummary) {
+                        Log.e("QUestionViewss", questionSummary.isLiked() + " ");
                         UIUtil.setTextView(itemView, R.id.question_complete_question, questionSummary.getText());
                         UIUtil.setTextView(itemView, R.id.question_complete_like_value, Integer.toString(questionSummary.getLikes()));
-                        UIUtil.setTextView(itemView, R.id.question_complete_asked_by_value, questionSummary.getUserName());
+                        UIUtil.setTextView(itemView, R.id.question_complete_asked_by_value, questionSummary.getPersonName());
                         UIUtil.setTextView(itemView, R.id.question_complete_difficulty_value, questionSummary.getDifficulty());
                         UIUtil.setTextView(itemView, R.id.question_complete_view_value, Integer.toString(questionSummary.getViews()));
                         UIUtil.setImageView(context, itemView, R.id.question_complete_image, questionSummary.getImageUrl());
 
-                        ImageView likeImage = itemView.findViewById(R.id.question_short_like);
-                        TextView textView = itemView.findViewById(R.id.question_short_like_value);
+                        ImageView likeImage = itemView.findViewById(R.id.question_complete_like_button);
+                        TextView textView = itemView.findViewById(R.id.question_complete_like_value);
 
                         final LikeState likeState = new QuestionLikeState(questionSummary.getQuestionId(),
                                 questionSummary.getLikes(),
@@ -146,7 +145,7 @@ public class QuestionView extends Activity {
                             return true;
                         });
 
-                        ImageView bookmarkImage = itemView.findViewById(R.id.question_short_bookmark);
+                        ImageView bookmarkImage = itemView.findViewById(R.id.question_complete_bookmark);
 
                         final BookMarkState bookMarkState = new BookMarkState(questionSummary.getQuestionId(),
                                 questionSummary.isBookmarked(),
@@ -161,6 +160,29 @@ public class QuestionView extends Activity {
                             }
                             return true;
                         });
+
+                        Button button = (Button) itemView.findViewById(R.id.question_complete_user_comment);
+                        if (questionSummary.isAnswered()) {
+                            button.setText("View your Answer");
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(context, UserComment.class);
+                                    intent.putExtra("questionId", questionSummary.getQuestionId());
+                                    context.startActivity(intent);
+                                }
+                            });
+                        } else {
+                            button.setText("Submit your Answer");
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(context, UserCommentPost.class);
+                                    intent.putExtra("questionId", questionSummary.getQuestionId());
+                                    context.startActivity(intent);
+                                }
+                            });
+                        }
 
                     }
                 }, throwable -> {
@@ -177,14 +199,33 @@ public class QuestionView extends Activity {
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
                 View itemView = inflater.inflate(R.layout.comment_short, parent, false);
-                questionViewPresenter.getComment(position).subscribe(new Action1<Comment>() {
+                questionViewPresenter.getComment(position).subscribe(new Action1<CommentSummary>() {
                     @Override
-                    public void call(Comment comment) {
+                    public void call(CommentSummary commentSummary) {
 
-                        UIUtil.setTextView(itemView, R.id.comment_short_question, comment.getText());
-                        UIUtil.setTextView(itemView, R.id.comment_short_like_value, Integer.toString(comment.getLikes()));
-                        UIUtil.setTextView(itemView, R.id.comment_short_answered_by_value, comment.getUserName());
-                        UIUtil.setImageView(context, itemView, R.id.comment_short_image, comment.getImageUrl());
+                        UIUtil.setTextView(itemView, R.id.comment_short_comment, commentSummary.getText());
+                        UIUtil.setTextView(itemView, R.id.comment_short_like_value, Integer.toString(commentSummary.getLikes()));
+                        UIUtil.setTextView(itemView, R.id.comment_short_answered_by_value, commentSummary.getPersonName());
+                        UIUtil.setImageView(context, itemView, R.id.comment_short_image, commentSummary.getImageUrl());
+
+                        ImageView likeImage = itemView.findViewById(R.id.comment_short_like);
+                        TextView textView = itemView.findViewById(R.id.comment_short_like_value);
+
+                        final LikeState likeState = new CommentLikeState(commentSummary.getCommentId(),
+                                commentSummary.getLikes(),
+                                commentSummary.isLiked(),
+                                likeImage,
+                                textView,
+                                ContextCompat.getDrawable(CommentViewAdapter.this.context, R.drawable.like_icon),
+                                ContextCompat.getDrawable(CommentViewAdapter.this.context, R.drawable.liked),
+                                questionViewPresenter);
+
+                        likeImage.setOnTouchListener((view, motionEvent) -> {
+                            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                                likeState.pressUpdate();
+                            }
+                            return true;
+                        });
 
                     }
                 }, new Action1<Throwable>() {
@@ -204,7 +245,7 @@ public class QuestionView extends Activity {
             if(position == 0) {
                 return getQuestionView(parent);
             } else {
-                return getCommentView(position, parent);
+                return getCommentView(position-1, parent);
             }
         }
     }

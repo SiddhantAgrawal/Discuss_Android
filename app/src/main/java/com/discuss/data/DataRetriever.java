@@ -3,12 +3,9 @@ package com.discuss.data;
 
 import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
+import com.discuss.datatypes.PersonCategoryPreference;
 import com.discuss.datatypes.Question;
-import com.discuss.datatypes.Response;
-import com.discuss.datatypes.UserCategoryPreference;
 
-import retrofit2.http.GET;
-import retrofit2.http.Url;
 import rx.Observable;
 
 import java.util.List;
@@ -39,12 +36,12 @@ public interface DataRetriever {
 
     Observable<Question> kthCommentedQuestion(final int kth, final int userId);
 
-    Observable<List<Comment>> getUserAddedComments(final int offset, final int limit, final String userId);
+    Observable<Comment> getUserAddedComment(final int questionID, final int userId);
 
     Observable<Question> getQuestion(final int questionId, final int userId);
 
     Observable<List<Category>> getCategory();
 
-    Observable<List<UserCategoryPreference>> getUserCategoryPreference(final String userId);
+    Observable<List<PersonCategoryPreference>> getUserCategoryPreference(final String userId);
 
 }

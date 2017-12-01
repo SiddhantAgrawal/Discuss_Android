@@ -1,6 +1,7 @@
 package com.discuss.utils;
 
 
+import android.util.Log;
 import android.widget.AbsListView;
 
 /**
@@ -17,7 +18,7 @@ public class EndlessScrollListener implements AbsListView.OnScrollListener {
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem,
                          int visibleItemCount, int totalItemCount) {
-
+        Log.e("Endless", "firstVisibleItem :" + firstVisibleItem + ", visibleItemCount :" + visibleItemCount + ", totalItemCount:" + totalItemCount);
         if ((totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
             command.execute();
         }

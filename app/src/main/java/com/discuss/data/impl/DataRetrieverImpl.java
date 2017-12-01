@@ -4,10 +4,10 @@ package com.discuss.data.impl;
 import com.discuss.data.DiscussService;
 import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;
+import com.discuss.datatypes.PersonCategoryPreference;
 import com.discuss.datatypes.Question;
 import com.discuss.datatypes.Response;
 import com.discuss.data.DataRetriever;
-import com.discuss.datatypes.UserCategoryPreference;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class DataRetrieverImpl implements DataRetriever {
 
     @Override
     public Observable<List<Comment>> getCommentsForQuestion(int questionId, int offset, int limit, int userId, final String sortBy, final String sortOrder) {
-        return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId + "&sortOrder=" + sortOrder + "&userId=" + userId).map(Response::getData);
+        return discussService.getCommentsForQuestion("question/comments?questionId=" + questionId + "&offset=" + offset + "&limit=" + limit + "&userId=" + userId + "&sortOrder=" + sortOrder).map(Response::getData);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class DataRetrieverImpl implements DataRetriever {
     }
 
     @Override
-    public Observable<List<Comment>> getUserAddedComments(int offset, int limit, String userId) {
-        return discussService.getUserAddedComments("user/comments?offset=" + offset + "&limit=" + limit + "&userId=" + userId).map(Response::getData);
+    public Observable<Comment> getUserAddedComment(int questionID, int userId) {
+        return discussService.getUserAddedComments("user/comment?questionID=" + questionID + "&userId=" + userId).map(Response::getData);
     }
 
     @Override
@@ -96,8 +96,8 @@ public class DataRetrieverImpl implements DataRetriever {
     }
 
     @Override
-    public Observable<List<UserCategoryPreference>> getUserCategoryPreference(String userId) {
-        return discussService.getUserCategoryPreference("category/pref?userId=" + userId).map(Response::getData);
+    public Observable<List<PersonCategoryPreference>> getUserCategoryPreference(String userId) {
+        return discussService.getPersonCategoryPreference("category/pref?userId=" + userId).map(Response::getData);
     }
 
 }

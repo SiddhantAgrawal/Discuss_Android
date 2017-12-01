@@ -59,17 +59,17 @@ public class MainFeedPresenterImpl implements MainFeedPresenter {
         return questionRepository.kthQuestion(kth, sortBy, sortOrder).map(new Func1<Question, QuestionSummary>() {
             @Override
             public QuestionSummary call(Question question) {
-                return new QuestionSummary.QuestionSummaryBuilder()
-                        .setQuestionId(question.getQuestionId())
-                        .setDifficulty(question.getDifficulty())
-                        .setImageUrl(question.getImageUrl())
-                        .setText(question.getText())
-                        .setLikes(question.getLikes())
-                        .setViews(question.getViews())
-                        .setLiked(question.isLiked())
-                        .setBookmarked(question.isBookmarked())
-                        .setUserId(question.getUserId())
-                        .setUserName(question.getUserName())
+                return QuestionSummary.builder()
+                        .questionId(question.getQuestionId())
+                        .difficulty(question.getDifficulty())
+                        .imageUrl(question.getImageUrl())
+                        .text(question.getText())
+                        .likes(question.getLikes())
+                        .views(question.getViews())
+                        .liked(question.isLiked())
+                        .bookmarked(question.isBookmarked())
+                        .personId(question.getPersonId())
+                        .personName(question.getPersonName())
                         .build();
             }
         });

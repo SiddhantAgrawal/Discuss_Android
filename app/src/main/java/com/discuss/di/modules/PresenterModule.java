@@ -10,6 +10,8 @@ import com.discuss.ui.bookmark.BookMarkPresenter;
 import com.discuss.ui.bookmark.impl.BookMarkPresenterImpl;
 import com.discuss.ui.category.CategorySelectorPresenter;
 import com.discuss.ui.category.CategorySelectorPresenterImpl;
+import com.discuss.ui.comment.view.UserCommentPresenter;
+import com.discuss.ui.comment.view.impl.UserCommentPresenterImpl;
 import com.discuss.ui.commented.CommentedPresenter;
 import com.discuss.ui.commented.impl.CommentedPresenterImpl;
 import com.discuss.ui.feed.MainFeedPresenter;
@@ -41,8 +43,8 @@ public class PresenterModule {
     }
 
     @Provides
-    QuestionViewPresenter providesQuestionViewPresenter(CommentRepository dataRetriever) {
-        return new QuestionViewPresenterImpl(dataRetriever);
+    QuestionViewPresenter providesQuestionViewPresenter(QuestionRepository questionRepository, CommentRepository commentRepository) {
+        return new QuestionViewPresenterImpl(questionRepository, commentRepository);
     }
 
     @Provides
@@ -63,6 +65,11 @@ public class PresenterModule {
     @Provides
     QuestionPostPresenter providesQuestionPostPresenter(DataRetriever dataRetriever) {
         return new QuestionPostPresenterImpl(dataRetriever);
+    }
+
+    @Provides
+    UserCommentPresenter providesUserCommentPresenter(CommentRepository commentRepository) {
+        return new UserCommentPresenterImpl(commentRepository);
     }
 
     @Provides

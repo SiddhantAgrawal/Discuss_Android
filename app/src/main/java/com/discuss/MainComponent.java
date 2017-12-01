@@ -6,6 +6,8 @@ import com.discuss.di.modules.PresenterModule;
 import com.discuss.di.modules.RepositoryModule;
 import com.discuss.ui.bookmark.impl.BookMarkFragment;
 import com.discuss.ui.category.CategorySelector;
+import com.discuss.ui.comment.post.UserCommentPost;
+import com.discuss.ui.comment.view.UserComment;
 import com.discuss.ui.commented.impl.CommentedQuestionFragment;
 import com.discuss.ui.feed.impl.MainActivity;
 import com.discuss.ui.liked.impl.LikedQuestionsFragment;
@@ -29,4 +31,6 @@ public interface MainComponent {
     void inject(LikedQuestionsFragment likedQuestionsFragment);
     void inject(AskQuestionView askQuestionView);
     void inject(QuestionView questionView);
+    void inject(UserComment userComment);
+    void inject(UserCommentPost userCommentPost);
 }

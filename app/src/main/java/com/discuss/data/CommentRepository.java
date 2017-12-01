@@ -4,6 +4,7 @@ package com.discuss.data;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import rx.Observable;
@@ -20,7 +21,11 @@ public interface CommentRepository {
     Observable<Question> getQuestionWithID(final int id);
     Observable<Boolean> likeCommentWithID(final int questionID);
     Observable<Boolean> unlikeCommentWithID(final int questionID);
+    Observable<Comment> userAddedComment(final int questionID);
     int estimatedSize();
-    void ensureKMoreComments(Action0 onCompleted);
+
+    void updateCommentText(int commentID, String text);
+    boolean isFurtherLoadingPossible();
+    void ensureKMoreComments(Action0 onCompleted, Action0 onNoUpdate);
     void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID);
 }

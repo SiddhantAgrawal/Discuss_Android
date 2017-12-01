@@ -73,6 +73,8 @@ public interface StateDiff {
 
     boolean isCommentLiked(final int commentId);
 
+    void updateCommentText(int commendID, final String comment);
+
     void flushLikeStateDiffForQuestions();
 
     void flushLikeStateDiffForComments();

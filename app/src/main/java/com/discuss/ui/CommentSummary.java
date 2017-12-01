@@ -1,6 +1,5 @@
 package com.discuss.ui;
 
-import com.discuss.datatypes.Question;
 
 import lombok.Builder;
 import lombok.Data;
@@ -11,16 +10,13 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class QuestionSummary {
-    private int questionId;
+public class CommentSummary {
+    private int commentId;
     private String text;
     private String imageUrl;
     private int likes;
     private int views;
     private int personId;
     private String personName;
-    private String difficulty;
     private boolean liked;
-    private boolean bookmarked;
-    private boolean answered;
 }

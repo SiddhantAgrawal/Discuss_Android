@@ -10,6 +10,7 @@ import com.discuss.data.SortBy;
 import com.discuss.data.SortOrder;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
+import com.discuss.ui.CommentSummary;
 import com.discuss.ui.QuestionSummary;
 import com.discuss.ui.question.view.QuestionViewPresenter;
 
@@ -50,8 +51,12 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
     }
 
     @Override
-    public void update(Action0 onCompletedAction) {
-        commentRepository.ensureKMoreComments(onCompletedAction);
+    public void update(Action0 onCompletedAction, Action0 onNoUpdate) {
+        if(commentRepository.isFurtherLoadingPossible()) {
+            commentRepository.ensureKMoreComments(onCompletedAction, onNoUpdate);
+        } else {
+            onNoUpdate.call();
+        }
     }
 
     @Override
@@ -61,8 +66,24 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
     }
 
     @Override
-    public Observable<Comment> getComment(int kth) {
-        return commentRepository.kthCommentForQuestion(kth, questionID, sortBy, sortOrder);
+    public Observable<CommentSummary> getComment(int kth) {
+        return commentRepository.kthCommentForQuestion(kth, questionID, sortBy, sortOrder).map(new Func1<Comment, CommentSummary>() {
+            @Override
+            public CommentSummary call(Comment comment) {
+                if (null == comment)
+                    return null;
+                return CommentSummary.builder()
+                        .commentId(comment.getCommentId())
+                        .imageUrl(comment.getImageUrl())
+                        .liked(comment.isLiked())
+                        .text(comment.getText())
+                        .personId(comment.getPersonId())
+                        .personName(comment.getPersonName())
+                        .views(comment.getViews())
+                        .likes(comment.getLikes())
+                        .build();
+            }
+        });
     }
 
     @Override
@@ -75,17 +96,17 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
         return commentRepository.getQuestionWithID(questionID).map(new Func1<Question, QuestionSummary>() {
             @Override
             public QuestionSummary call(Question question) {
-                return new QuestionSummary.QuestionSummaryBuilder()
-                        .setQuestionId(question.getQuestionId())
-                        .setDifficulty(question.getDifficulty())
-                        .setImageUrl(question.getImageUrl())
-                        .setText(question.getText())
-                        .setLikes(question.getLikes())
-                        .setViews(question.getViews())
-                        .setLiked(question.isLiked())
-                        .setBookmarked(question.isBookmarked())
-                        .setUserId(question.getUserId())
-                        .setUserName(question.getUserName())
+                return QuestionSummary.builder()
+                        .questionId(question.getQuestionId())
+                        .difficulty(question.getDifficulty())
+                        .imageUrl(question.getImageUrl())
+                        .text(question.getText())
+                        .likes(question.getLikes())
+                        .views(question.getViews())
+                        .liked(question.isLiked())
+                        .bookmarked(question.isBookmarked())
+                        .personId(question.getPersonId())
+                        .personName(question.getPersonName())
                         .build();
             }
         });

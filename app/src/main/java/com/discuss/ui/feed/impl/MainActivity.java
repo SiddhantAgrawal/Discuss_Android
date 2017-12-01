@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.discuss.DiscussApplication;
 import com.discuss.ui.BookMarkState;
 import com.discuss.ui.LikeState;
+import com.discuss.ui.QuestionLikeState;
 import com.discuss.ui.QuestionSummary;
 import com.discuss.ui.category.CategorySelector;
 import com.discuss.ui.commented.impl.CommentedQuestionFragment;
@@ -43,7 +44,6 @@ import com.discuss.ui.question.post.impl.AskQuestionView;
 import com.discuss.ui.question.view.QuestionView;
 import com.discuss.utils.UIUtil;
 import com.example.siddhantagrawal.check_discuss.R;
-import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
 
@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
             ImageView likeImage = itemView.findViewById(R.id.question_short_like);
             TextView textView = itemView.findViewById(R.id.question_short_like_value);
 
-            final LikeState likeState = new LikeState(questionSummary.getQuestionId(),
+            final LikeState likeState = new QuestionLikeState(questionSummary.getQuestionId(),
                     questionSummary.getLikes(),
                     questionSummary.isLiked(),
                     likeImage,

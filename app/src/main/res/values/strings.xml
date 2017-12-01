@@ -17,6 +17,8 @@
     <string name="save">save</string>
     <string name="asked_by">Asked by</string>
     <string name="answered_by">Answered by</string>
+    <string name="your_comment">Your comment</string>
+    <string name="add_comment">Add Comment</string>
     <string-array name="titles">
         <item>BookMarks</item>
         <item>Questions Liked</item>

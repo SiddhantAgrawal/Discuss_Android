@@ -1,11 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1">
-
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -13,7 +8,7 @@
 
 
         <TextView
-            android:id="@+id/question_complete_difficulty_label"
+            android:id="@+id/question_user_comment_difficulty_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="normal"
@@ -23,7 +18,7 @@
             android:text="@string/difficulty" />
 
         <TextView
-            android:id="@+id/question_complete_difficulty_value"
+            android:id="@+id/question_user_comment_difficulty_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="normal"
@@ -38,25 +33,24 @@
     </View>
 
     <TextView
-        android:id="@+id/question_complete_question"
+        android:id="@+id/question_user_comment_question"
         android:textSize="25sp"
         android:textStyle="bold"
         android:layout_marginStart="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
     <View
         android:layout_width="fill_parent"
         android:layout_height="5dp">
     </View>
 
     <ImageView
-        android:id="@+id/question_complete_image"
+        android:id="@+id/question_user_comment_image"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"
-        android:adjustViewBounds="true" />
-
+        android:adjustViewBounds="true"
+        />
     <View
         android:layout_width="fill_parent"
         android:layout_height="5dp">
@@ -68,7 +62,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
-            android:id="@+id/question_complete_view_value"
+            android:id="@+id/question_user_comment_view_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="normal"
@@ -76,7 +70,7 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/question_complete_view_label"
+            android:id="@+id/question_user_comment_view_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="normal"
@@ -91,34 +85,6 @@
         android:layout_height="10dp">
     </View>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/question_complete_asked_by_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="normal"
-            android:layout_marginStart="10dp"
-            android:textSize="20sp"
-            android:text="@string/asked_by"/>
-
-        <TextView
-            android:id="@+id/question_complete_asked_by_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="normal"
-            android:textSize="20sp"
-            android:layout_marginStart="5dp"
-            android:text="deepak" />
-
-    </LinearLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="10dp">
-    </View>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -126,7 +92,7 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/question_complete_like_button"
+            android:id="@+id/question_user_comment_like"
             android:layout_width="20dp"
             android:layout_height="35dp"
             android:layout_marginStart="8dp"
@@ -134,18 +100,18 @@
             android:src="@drawable/liked" />
 
         <TextView
-            android:id="@+id/question_complete_like_value"
+            android:id="@+id/question_user_comment_like_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginStart="2dp"
-            android:layout_toEndOf="@id/question_complete_like_button"
+            android:layout_toEndOf="@id/question_user_comment_like"
             android:textSize="20sp"
             android:textStyle="normal" />
 
 
         <ImageView
-            android:id="@+id/question_complete_bookmark"
+            android:id="@+id/question_user_comment_bookmark"
             android:layout_width="20dp"
             android:layout_height="25dp"
             android:adjustViewBounds="true"
@@ -158,35 +124,34 @@
 
     <View
         android:layout_width="fill_parent"
-        android:layout_height="10dp">
+        android:layout_height="5dp">
     </View>
-
-    <Button
-        android:id="@+id/question_complete_user_comment"
-        android:layout_width="match_parent"
-        android:layout_height="37dp"
-        android:background="@drawable/button_border"
-        android:textStyle="normal"/>
 
     <View
-        android:layout_width="fill_parent"
-        android:layout_height="10dp">
-    </View>
-
-
-    <TextView
-        android:id="@+id/question_complete_comment_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="normal"
-        android:textSize="20sp"
-        android:layout_marginStart="5dp"
-        android:text="comments :" />
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:background="@android:color/darker_gray"/>
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="5dp">
     </View>
 
+    <TextView
+        android:id="@+id/question_user_comment_user_comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="normal"
+        android:textSize="20sp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/your_comment" />
+
+    <TextView
+        android:id="@+id/question_user_comment_comment_text_view"
+        android:text="abc"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content" />
 
 </LinearLayout>
+

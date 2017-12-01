@@ -20,4 +20,8 @@ public class Utils {
         }
         catch(Exception ex){}
     }
+
+    public static boolean isEqual(String string1, String string2) {
+        return string1 == null && string2 == null || string1 != null && string2 != null && string1.equals(string2);
+    }
 }

@@ -136,6 +136,7 @@ public class QuestionRepositoryImpl implements QuestionRepository {
     @Override
     public Observable<Question> getQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
+        Log.e("getQuestion", "questionId" + question + " " + "question" + question.get().isLiked());
         return question.map(Observable::just)
                 .orElseGet(() -> dataRetriever.getQuestion(questionID, userID)
                         .doOnNext(this.state::putInCachedQuestions)
@@ -149,6 +150,7 @@ public class QuestionRepositoryImpl implements QuestionRepository {
         if (question.isPresent()) {
             Question question1 = question.get();
             question1.setLiked(true);
+            question1.incrementLikes();
         }
         stateDiff.likeQuestion(questionID);
         return Observable.just(true);
@@ -160,7 +162,9 @@ public class QuestionRepositoryImpl implements QuestionRepository {
         if (question.isPresent()) {
             Question question1 = question.get();
             question1.setLiked(false);
+            question1.decrementLikes();
         }
+        Log.e("Unliked question", "" + this.state.getQuestion(questionID).get().isLiked());
         stateDiff.undoLikeForQuestion(questionID);
         return Observable.just(true);
     }

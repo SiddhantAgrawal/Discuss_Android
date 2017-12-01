@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/user_comment_comment_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="normal"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:text="@string/your_comment" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:background="@android:color/darker_gray"/>
+
+    <ViewSwitcher
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/user_comment_comment_view_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <TextView
+            android:id="@+id/user_comment_comment_text_view"
+            android:text="abc"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content" />
+
+        <EditText
+            android:id="@+id/user_comment_comment_edit_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="efg" />
+    </ViewSwitcher>
+
+    <Button
+        android:id="@+id/user_comment_edit_button"
+        android:layout_width="match_parent"
+        android:layout_height="37dp"
+        android:text="Edit your Answer"
+        android:background="@drawable/button_border" />
+
+</LinearLayout>

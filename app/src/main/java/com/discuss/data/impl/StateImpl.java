@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import com.discuss.data.DataUpdater;
 import com.discuss.data.StateDiff;
+import com.discuss.datatypes.Comment;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class StateImpl implements StateDiff {
     private final Map<Integer, Object> undoBookmarkedQuestions;
     private final Map<Integer, Object> likedComments;
     private final Map<Integer, Object> undoLikedComments;
+    private final Map<Integer, String> pendingEditedComments;
     private final int userId;
     private final DataUpdater dataUpdater;
 
@@ -42,6 +44,7 @@ public class StateImpl implements StateDiff {
         this.undoBookmarkedQuestions = new ConcurrentHashMap<>();
         this.likedComments = new ConcurrentHashMap<>();
         this.undoLikedComments = new ConcurrentHashMap<>();
+        this.pendingEditedComments = new ConcurrentHashMap<>();
         this.userId = 0; /* @todo(deepak): Fix this **/
         this.dataUpdater = dataUpdater;
     }
@@ -99,6 +102,11 @@ public class StateImpl implements StateDiff {
     @Override
     public boolean isCommentLiked(int commentId) {
         return likedComments.containsKey(commentId);
+    }
+
+    @Override
+    public void updateCommentText(int commentID, String comment) {
+        this.pendingEditedComments.put(commentID, comment);
     }
 
     @Override
