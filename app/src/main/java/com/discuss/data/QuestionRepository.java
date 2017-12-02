@@ -3,6 +3,7 @@ package com.discuss.data;
 import com.discuss.datatypes.Question;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Action0;
 
 /**
@@ -10,17 +11,17 @@ import rx.functions.Action0;
  */
 public interface QuestionRepository {
 
-    Observable<Question> kthQuestion(final int kth, final SortBy sortBy, final SortOrder sortOrder);
+    Single<Question> kthQuestion(final int kth, final SortBy sortBy, final SortOrder sortOrder);
 
-    Observable<Question> getQuestionWithID(final int questionID);
+    Single<Question> getQuestionWithID(final int questionID);
 
-    Observable<Boolean> likeQuestionWithID(final int questionID);
+    Single<Boolean> likeQuestionWithID(final int questionID);
 
-    Observable<Boolean> unlikeQuestionWithID(final int questionID);
+    Single<Boolean> unlikeQuestionWithID(final int questionID);
 
-    Observable<Boolean> bookmarkQuestionWithID(final int questionID);
+    Single<Boolean> bookmarkQuestionWithID(final int questionID);
 
-    Observable<Boolean> unbookmarkQuestionWithID(final int questionID);
+    Single<Boolean> unbookmarkQuestionWithID(final int questionID);
 
     void ensureKMoreQuestions(Action0 onCompleted);
 

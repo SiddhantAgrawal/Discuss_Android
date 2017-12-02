@@ -82,6 +82,18 @@ public class QuestionView extends Activity {
 
     }
 
+    @Override
+    public void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        questionViewPresenter.save();
+
+    }
+
     private class CommentViewAdapter extends BaseAdapter {
 
         private Context context;
@@ -194,6 +206,7 @@ public class QuestionView extends Activity {
         }
 
         private View getCommentView(final int position, ViewGroup parent) {
+            Log.e("QQQQQQQQ", position + "");
             try {
                 LayoutInflater inflater = (LayoutInflater) context
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

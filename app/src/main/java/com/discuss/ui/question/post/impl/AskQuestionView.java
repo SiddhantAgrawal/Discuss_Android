@@ -48,8 +48,7 @@ public class AskQuestionView extends AppCompatActivity {
         Button addImageButton = (Button) findViewById(R.id.ask_question_choose_image);
         questionPostPresenter.
                 getCategories().
-                first().
-                doOnNext(categories -> {
+                doOnSuccess(categories -> {
                     final Spinner categoryDropDown = (Spinner) findViewById(R.id.ask_question_tag_button);
                     categoryDropDown.setAdapter(new ArrayAdapter<Category>(AskQuestionView.this, android.R.layout.simple_list_item_1, categories));
                     addImageButton.setOnClickListener(new View.OnClickListener() {

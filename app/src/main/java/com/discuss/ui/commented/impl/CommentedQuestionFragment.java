@@ -65,7 +65,7 @@ public class CommentedQuestionFragment extends Fragment implements com.discuss.u
         //getActivity().setTitle("Answered");
         ((DiscussApplication) getActivity().getApplication()).getMainComponent().inject(this);
 
-        View itemView = inflater.inflate(R.layout.fragment_liked_questions, container, false);
+        View itemView = inflater.inflate(R.layout.fragment_added_comments, container, false);
         ListView listView = (ListView) itemView.findViewById(R.id.fragment_liked_questions);
 
         adapter = new QuestionViewAdapter(getActivity(), commentedPresenter);
@@ -107,7 +107,7 @@ public class CommentedQuestionFragment extends Fragment implements com.discuss.u
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             View itemView = inflater.inflate(R.layout.question_user_comment, parent, false);
-            final QuestionSummary questionSummary = commentedPresenter.get(position).toBlocking().first();
+            final QuestionSummary questionSummary = commentedPresenter.get(position).toBlocking().value();
 
             UIUtil.setTextView(itemView, R.id.question_user_comment_question, questionSummary.getText());
             UIUtil.setTextView(itemView, R.id.question_user_comment_like_value, Integer.toString(questionSummary.getLikes()));

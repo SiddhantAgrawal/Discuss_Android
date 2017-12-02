@@ -7,6 +7,7 @@ import com.discuss.datatypes.Question;
 import java.util.List;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Action0;
 
 /**
@@ -19,5 +20,5 @@ public interface QuestionPostPresenter {
 
     void init(Action0 action0);
 
-    Observable<List<Category>> getCategories();
+    Single<List<Category>> getCategories();
 }

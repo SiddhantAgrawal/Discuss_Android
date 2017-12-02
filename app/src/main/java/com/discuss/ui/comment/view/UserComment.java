@@ -68,7 +68,6 @@ public class UserComment extends Activity {
 
             @Override
             public void onError(Throwable e) {
-
             }
 
             @Override
@@ -80,14 +79,13 @@ public class UserComment extends Activity {
             }
         });
 
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
         if(null != userCommentPresenter) {
-            userCommentPresenter.saveEditedComment();
+            userCommentPresenter.save();
         }
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import rx.Observable;
+import rx.Single;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
@@ -30,8 +31,8 @@ public class QuestionPostPresenterImpl implements QuestionPostPresenter {
     }
 
     @Override
-    public Observable<List<Category>> getCategories() {
-        return dataRetriever.getCategory().onBackpressureBuffer().
+    public Single<List<Category>> getCategories() {
+        return dataRetriever.getCategory().
                 subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread());
     }

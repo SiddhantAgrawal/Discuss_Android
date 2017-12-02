@@ -7,6 +7,7 @@ import com.discuss.ui.QuestionSummary;
 import java.io.Serializable;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Action0;
 
 /**
@@ -25,7 +26,7 @@ public interface LikedPresenter extends QuestionPresenter {
 
     Observable<Boolean> refresh();
 
-    Observable<QuestionSummary> get(int position);
+    Single<QuestionSummary> get(int position);
 
     int size();
 }

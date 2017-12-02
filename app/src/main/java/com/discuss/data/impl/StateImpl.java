@@ -15,9 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 
 import rx.Observable;
+import rx.Single;
+import rx.SingleSubscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * @author Deepak Thakur
@@ -110,44 +114,42 @@ public class StateImpl implements StateDiff {
     }
 
     @Override
-    public void flushLikeStateDiffForQuestions() {
-        flush(() -> {},
+    public Observable<Pair<Integer,Boolean>> flushLikeStateDiffForQuestions() {
+        return flush(() -> {},
                 likedQuestions,
-                questionId -> dataUpdater.likeQuestion(questionId, userId),
+                questionId -> dataUpdater.likeQuestion(questionId, userId).toObservable(),
                 undoLikedQuestions,
-                questionId -> dataUpdater.unlikeComment(questionId, userId));
+                questionId -> dataUpdater.unlikeComment(questionId, userId).toObservable());
     }
 
     @Override
-    public void flushLikeStateDiffForComments() {
-        flush(() -> {},
+    public Observable<Pair<Integer,Boolean>> flushLikeStateDiffForComments() {
+        return flush(() -> {},
                 likedComments,
-                commentId -> dataUpdater.likeComment(commentId, userId),
+                commentId -> dataUpdater.likeComment(commentId, userId).toObservable(),
                 undoLikedComments,
-                commentId -> dataUpdater.unlikeComment(commentId, userId));
-
+                commentId -> dataUpdater.unlikeComment(commentId, userId).toObservable());
     }
 
     @Override
-    public void flushBookmarkedStateDiffForQuestions() {
-        flush(() -> {},
+    public Observable<Pair<Integer,Boolean>> flushBookmarkedStateDiffForQuestions() {
+        return flush(() -> {},
                 bookmarkedQuestions,
-                questionId -> dataUpdater.bookmarkQuestion(questionId, userId),
+                questionId -> dataUpdater.bookmarkQuestion(questionId, userId).toObservable(),
                 undoBookmarkedQuestions,
-                questionId -> dataUpdater.unbookmarkQuestion(questionId, userId));
-
-
+                questionId -> dataUpdater.unbookmarkQuestion(questionId, userId).toObservable());
     }
 
     @Override
-    public void flushAll() {
-        flushBookmarkedStateDiffForQuestions();
-        flushLikeStateDiffForComments();
-        flushLikeStateDiffForQuestions();
+    public Single<Boolean> flushAll() {
+        return Observable.merge(flushBookmarkedStateDiffForQuestions(), flushLikeStateDiffForComments(), flushLikeStateDiffForQuestions())
+                .count()
+                .map(a -> a >= 0)
+                .toSingle();
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    <K> void flush(Action0 onCompleted, Map<K, Object> entity, Func1<K, Observable<Pair<K, Boolean>>> entityfunc1, Map<K, Object> undoEntity, Func1<K, Observable<Pair<K, Boolean>>> undoEntityfunc2) {
+    <K> Observable<Pair<K,Boolean>> flush(Action0 onCompleted, Map<K, Object> entity, Func1<K, Observable<Pair<K, Boolean>>> entityfunc1, Map<K, Object> undoEntity, Func1<K, Observable<Pair<K, Boolean>>> undoEntityfunc2) {
         Set<K> entityCopy = new HashSet<>(entity.keySet());
         Set<K> undoEntityCopy = new HashSet<>(undoEntity.keySet());
         entity.clear();
@@ -174,7 +176,7 @@ public class StateImpl implements StateDiff {
         });
 
         Observable<Pair<K, Boolean>> mergedObservable = Observable.merge(observable1, observable2);
-        mergedObservable.subscribe(a -> {}, throwable -> {}, onCompleted);
+        return mergedObservable.cache();
 
     }
 

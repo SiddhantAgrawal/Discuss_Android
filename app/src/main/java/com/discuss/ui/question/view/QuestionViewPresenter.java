@@ -8,6 +8,7 @@ import com.discuss.ui.QuestionPresenter;
 import com.discuss.ui.QuestionSummary;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Action0;
 
 /**
@@ -22,9 +23,12 @@ public interface QuestionViewPresenter extends QuestionPresenter, CommentPresent
 
     Observable<Boolean> refresh();
 
-    Observable<CommentSummary> getComment(int position);
+    Single<CommentSummary> getComment(int position);
 
     int size();
 
-    Observable<QuestionSummary> getQuestion();
+    Single<QuestionSummary> getQuestion();
+
+    void save();
+
 }

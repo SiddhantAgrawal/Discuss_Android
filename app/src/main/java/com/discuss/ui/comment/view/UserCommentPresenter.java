@@ -13,5 +13,5 @@ public interface UserCommentPresenter {
     Observable<CommentSummary> init(int questionID);
     void setEditedComment(final String editedComment);
     String getEditedComment();
-    void saveEditedComment();
+    void save();
 }

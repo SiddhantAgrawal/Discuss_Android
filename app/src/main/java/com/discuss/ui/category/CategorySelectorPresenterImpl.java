@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.inject.Inject;
 
 import rx.Observable;
+import rx.Single;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -19,10 +20,7 @@ import rx.schedulers.Schedulers;
 public class CategorySelectorPresenterImpl implements CategorySelectorPresenter {
     private final DataRetriever dataRetriever;
     private List<PersonCategoryPreference> personCategoryPreferences;
-    private int limit;
-    private volatile boolean isLoading;
-    private Observable<List<PersonCategoryPreference>> questionObservable;
-    private final ReentrantLock lock = new ReentrantLock();
+    private Single<List<PersonCategoryPreference>> questionObservable;
 
     @Inject
     public CategorySelectorPresenterImpl(DataRetriever dataRetriever) {
@@ -33,21 +31,6 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
         if (null == dataRetriever || null == personCategoryPreferences) {
             init(onCompleted);
         }
-    }
-
-    private void setQuestionObservableAndSubscribeForFirstSubscriber() {
-        questionObservable = dataRetriever.   /* hot observable */
-                getUserCategoryPreference(""). /* TODO(Deepak): add proper values */
-                onBackpressureBuffer().
-                subscribeOn(Schedulers.io()).
-                publish().
-                refCount().
-                observeOn(AndroidSchedulers.mainThread());
-        questionObservable.subscribe(onNextQuestionsList, onError, (() -> {
-            synchronized (lock) {
-                isLoading = false;
-            }
-        }));
     }
 
     private final Action1<List<PersonCategoryPreference>> onNextQuestionsList = new Action1<List<PersonCategoryPreference>>() {
@@ -65,14 +48,11 @@ public class CategorySelectorPresenterImpl implements CategorySelectorPresenter 
     @Override
     public void init(Action0 onCompletedAction) {
         personCategoryPreferences = new CopyOnWriteArrayList<>(); /* update operations are in bulk and not to often to degrade the performance  */
-        limit = 10;
-        synchronized (lock) {
-            if (!isLoading) {
-                isLoading = true;
-                setQuestionObservableAndSubscribeForFirstSubscriber();
-            }
-            questionObservable.subscribe((a) -> {}, (a) ->{}, onCompletedAction);
-        }
+        questionObservable = dataRetriever.   /* hot observable */
+                getUserCategoryPreference(""). /* TODO(Deepak): add proper values */
+                doOnSuccess(preferences -> personCategoryPreferences.addAll(preferences)).
+                subscribeOn(Schedulers.io()).
+                observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override

@@ -103,7 +103,7 @@ public class BookMarkFragment extends Fragment implements com.discuss.ui.View {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             View itemView = inflater.inflate(R.layout.question_short, parent, false);
-            final QuestionSummary questionSummary = bookMarkPresenter.get(position).toBlocking().first();
+            final QuestionSummary questionSummary = bookMarkPresenter.get(position).toBlocking().value();
 
             UIUtil.setTextView(itemView, R.id.question_short_question, questionSummary.getText());
             UIUtil.setTextView(itemView, R.id.question_short_like_value, Integer.toString(questionSummary.getLikes()));

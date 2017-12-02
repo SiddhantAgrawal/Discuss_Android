@@ -3,6 +3,7 @@ package com.discuss.di.modules;
 import com.discuss.data.BookMarkRepository;
 import com.discuss.data.CommentRepository;
 import com.discuss.data.DataRetriever;
+import com.discuss.data.DataUpdater;
 import com.discuss.data.LikedQuestionsRepository;
 import com.discuss.data.QuestionRepository;
 import com.discuss.data.QuestionsAnsweredRepository;
@@ -52,10 +53,11 @@ public class RepositoryModule {
     @Provides
     @Singleton
     public CommentRepository providesCommentRepository(DataRetriever dataRetriever,
+                                                       DataUpdater dataUpdater,
                                                        StateDiff stateDiff,
                                                        QuestionRepository questionRepository,
                                                        @Named("user_id") final int userID) {
-        return new CommentRepositoryImpl(dataRetriever, stateDiff, questionRepository, userID);
+        return new CommentRepositoryImpl(dataRetriever, dataUpdater, stateDiff, questionRepository, userID);
     }
 
     @Provides

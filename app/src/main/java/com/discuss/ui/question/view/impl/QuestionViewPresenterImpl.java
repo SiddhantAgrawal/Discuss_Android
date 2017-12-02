@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.Scheduler;
+import rx.Single;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -66,7 +67,7 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
     }
 
     @Override
-    public Observable<CommentSummary> getComment(int kth) {
+    public Single<CommentSummary> getComment(int kth) {
         return commentRepository.kthCommentForQuestion(kth, questionID, sortBy, sortOrder).map(new Func1<Comment, CommentSummary>() {
             @Override
             public CommentSummary call(Comment comment) {
@@ -92,7 +93,7 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
     }
 
     @Override
-    public Observable<QuestionSummary> getQuestion() {
+    public Single<QuestionSummary> getQuestion() {
         return commentRepository.getQuestionWithID(questionID).map(new Func1<Question, QuestionSummary>() {
             @Override
             public QuestionSummary call(Question question) {
@@ -113,32 +114,37 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
     }
 
     @Override
-    public Observable<Boolean> likeCommentWithID(int commentID) {
+    public void save() {
+        this.commentRepository.save();
+    }
+
+    @Override
+    public Single<Boolean> likeCommentWithID(int commentID) {
         return commentRepository.likeCommentWithID(commentID);
     }
 
     @Override
-    public Observable<Boolean> unlikeCommentWithID(int commentID) {
+    public Single<Boolean> unlikeCommentWithID(int commentID) {
         return commentRepository.unlikeCommentWithID(commentID);
     }
 
     @Override
-    public Observable<Boolean> likeQuestionWithID(int questionID) {
+    public Single<Boolean> likeQuestionWithID(int questionID) {
         return questionRepository.likeQuestionWithID(questionID);
     }
 
     @Override
-    public Observable<Boolean> unlikeQuestionWithID(int questionID) {
+    public Single<Boolean> unlikeQuestionWithID(int questionID) {
         return questionRepository.unlikeQuestionWithID(questionID);
     }
 
     @Override
-    public Observable<Boolean> bookmarkQuestionWithID(int questionID) {
+    public Single<Boolean> bookmarkQuestionWithID(int questionID) {
         return questionRepository.bookmarkQuestionWithID(questionID);
     }
 
     @Override
-    public Observable<Boolean> unbookmarkQuestionWithID(int questionID) {
+    public Single<Boolean> unbookmarkQuestionWithID(int questionID) {
         return questionRepository.unbookmarkQuestionWithID(questionID);
     }
 }

@@ -1,6 +1,7 @@
 package com.discuss.ui;
 
 import rx.Observable;
+import rx.Single;
 
 /**
  *
@@ -8,8 +9,8 @@ import rx.Observable;
  */
 public interface CommentPresenter {
 
-    Observable<Boolean> likeCommentWithID(final int questionID);
+    Single<Boolean> likeCommentWithID(final int questionID);
 
-    Observable<Boolean> unlikeCommentWithID(final int questionID);
+    Single<Boolean> unlikeCommentWithID(final int questionID);
 
 }

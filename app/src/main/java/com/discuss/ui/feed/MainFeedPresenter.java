@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Action0;
 
 /**
@@ -26,7 +27,7 @@ public interface MainFeedPresenter extends QuestionPresenter{
 
     Observable<Boolean> refresh();
 
-    Observable<QuestionSummary> get(int position);
+    Single<QuestionSummary> get(int position);
 
     int size();
 

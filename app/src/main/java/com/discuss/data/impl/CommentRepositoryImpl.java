@@ -1,15 +1,18 @@
 package com.discuss.data.impl;
 
 import android.util.Log;
+import android.util.Pair;
 
 import com.discuss.data.CommentRepository;
 import com.discuss.data.DataRetriever;
+import com.discuss.data.DataUpdater;
 import com.discuss.data.QuestionRepository;
 import com.discuss.data.SortBy;
 import com.discuss.data.SortOrder;
 import com.discuss.datatypes.Comment;
 import com.discuss.datatypes.Question;
 import com.discuss.data.StateDiff;
+import com.discuss.datatypes.request.CommentAdditionRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -17,9 +20,11 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
+import rx.Single;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -27,16 +32,19 @@ import rx.schedulers.Schedulers;
  */
 public class CommentRepositoryImpl implements CommentRepository {
     private final DataRetriever dataRetriever;
+    private final DataUpdater dataUpdater;
     private final StateDiff stateDiff;
     private final int userID;
     private final QuestionRepository questionRepository;
     private final State state;
 
     public CommentRepositoryImpl(DataRetriever dataRetriever,
+                                 DataUpdater dataUpdater,
                                  StateDiff stateDiff,
                                  QuestionRepository questionRepository,
                                  final int userID) {
         this.dataRetriever = dataRetriever;
+        this.dataUpdater = dataUpdater;
         this.stateDiff = stateDiff;
         this.state = new State();
         this.userID = userID;
@@ -44,71 +52,88 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public Observable<Comment> kthCommentForQuestion(int kth, int questionID, SortBy sortBy, SortOrder sortOrder) {
-        if (this.state.getSortOrder() == sortOrder &&
-            this.state.getSortBy() == sortBy &&
-            this.state.question != null &&
-            this.state.question.getQuestionId() == questionID) {
-            return this.state.kthComment(kth);
-        } else {
-            this.state.updateType(sortOrder, sortBy, questionID);
-            return this.state.kthComment(kth);
-        }
+    public Single<Comment> kthCommentForQuestion(int kth, int questionID, SortBy sortBy, SortOrder sortOrder) {
+
+        Observable<Comment> alternative = this.stateDiff.flushAll()
+                .doOnSuccess((b) -> this.state.updateType(sortOrder, sortBy, questionID))
+                .flatMap(aBoolean -> state.kthComment(kth)).toObservable();
+
+        return Observable.just(this.state)
+                .filter(s -> s.getSortOrder() == sortOrder && s.getSortBy() == sortBy)
+                .flatMap(state -> state.question.map(q -> new Pair<State, Question>(state, q)).toObservable())
+                .filter(p -> p.second.getQuestionId() == questionID)
+                .flatMap(p -> p.first.kthComment(kth).toObservable())
+                .switchIfEmpty(alternative)
+                .toSingle();
     }
 
     @Override
-    public Observable<Question> getQuestion(int kth, SortBy sortBy, SortOrder sortOrder) {
-        return Observable.just(this.state.question);
+    public Single<Question> getQuestion(int kth, SortBy sortBy, SortOrder sortOrder) {
+        return this.state.question;
     }
 
     @Override
-    public Observable<Question> getQuestionWithID(int id) {
+    public Single<Question> getQuestionWithID(int id) {
         return questionRepository.getQuestionWithID(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-
     }
 
     @Override
-    public Observable<Boolean> likeCommentWithID(int commentID) {
+    public Single<Boolean> likeCommentWithID(int commentID) {
         Optional<Comment> comment = this.state.getComment(commentID);
         if(comment.isPresent()) {
             Comment comment1 = comment.get();
             comment1.setLiked(true);
         }
         stateDiff.likeComment(commentID);
-        return Observable.just(true);
+        return Single.just(true);
     }
 
     @Override
-    public Observable<Boolean> unlikeCommentWithID(int commentID) {
+    public Single<Boolean> unlikeCommentWithID(int commentID) {
         Optional<Comment> comment = this.state.getComment(commentID);
         if(comment.isPresent()) {
             Comment comment1 = comment.get();
             comment1.setLiked(false);
         }
         stateDiff.undoLikeForComment(commentID);
-        return Observable.just(true);
+        return Single.just(true);
     }
 
     @Override
-    public Observable<Comment> userAddedComment(final int questionID) {
-        if (this.state.question != null &&
-                this.state.question.getQuestionId() == questionID) {
-            return this.state.userAddedComment();
-        } else {
-            this.state.updateType(this.state.sortOrder, this.state.sortBy, questionID);
-            return this.state.userAddedComment();
-        }
+    public Single<Comment> userAddedComment(final int questionID) {
+        Observable<Comment> alternative = this.stateDiff.flushAll()
+                .doOnSuccess((b) -> this.state.updateType(this.state.sortOrder, this.state.sortBy, questionID))
+                .flatMap(aBoolean -> state.userAddedComment()).toObservable();
+
+        return Observable.just(this.state)
+                .flatMap(state -> state.question.map(q -> new Pair<State, Question>(state, q)).toObservable())
+                .filter(p -> p.second.getQuestionId() == questionID)
+                .flatMap(p -> p.first.userAddedComment().toObservable())
+                .switchIfEmpty(alternative)
+                .toSingle();
+    }
+
+    @Override
+    public Single<Comment> newUserComment(CommentAdditionRequest comment) {
+        this.stateDiff.flushAll();
+        return this.state.newUserComment(comment);
     }
 
     @Override
     public void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID) {
-        Log.e("commentRepo", "inside init");
-        this.state.updateType(sortOrder, sortBy, questionID);
-        ensureKMoreComments(onCompleted, () -> {});
+        this.stateDiff.flushAll().subscribe(a -> {
+            Log.e("commentRepo", "inside init");
+            this.state.updateType(sortOrder, sortBy, questionID);
+            ensureKMoreComments(onCompleted, () -> {});
+        });
     }
 
+    @Override
+    public Single<Boolean> save() {
+        return this.stateDiff.flushAll();
+    }
 
 
     @Override
@@ -134,12 +159,12 @@ public class CommentRepositoryImpl implements CommentRepository {
 
     private final class State {
         private volatile int slab;
-        private Map<Integer, Observable<List<Comment>>> commentRankMap;
+        private Map<Integer, Single<List<Comment>>> commentRankMap;
         private volatile SortBy sortBy;
         private volatile SortOrder sortOrder;
         private Map<Integer, Comment> commentIDMap;
-        private volatile Question question;
-        private volatile Observable<Comment> userComment;
+        private volatile Single<Question> question;
+        private volatile Single<Comment> userComment;
         private volatile int size;
         private volatile boolean isFurtherLoadingPossible;
 
@@ -158,20 +183,21 @@ public class CommentRepositoryImpl implements CommentRepository {
             return this.isFurtherLoadingPossible;
         }
 
-        Observable<List<Comment>> getComments(int slabId) {
-            return Observable.create(new Observable.OnSubscribe<List<Comment>>() {
+        Single<List<Comment>> getComments(int slabId) {
+            return question.flatMap(new Func1<Question, Single<List<Comment>>>() {
                 @Override
-                public void call(Subscriber<? super List<Comment>> subscriber) {
-                    dataRetriever.getCommentsForQuestion(question.getQuestionId(), slabId * 10, 10, userID, sortBy.name(), sortOrder.name()).
-                            subscribe(subscriber);
-                }
-            }).doOnNext(list -> list.forEach(comment -> commentIDMap.put(comment.getCommentId(), comment))).
-                    doOnNext(list -> slab = Math.max(slab, slabId + 1)).
-                    doOnNext(list -> size += list.size()).
-                    doOnNext(list -> isFurtherLoadingPossible = (list.size() == 10)).
-                    subscribeOn(Schedulers.io()).
-                    observeOn(AndroidSchedulers.mainThread()).
-                    cache();
+                public Single<List<Comment>> call(Question question) {
+                    return dataRetriever.getCommentsForQuestion(question.getQuestionId(), slabId * 10, 10, userID, sortBy.name(), sortOrder.name());
+                };
+            }).doOnSuccess(list -> list.forEach(comment -> commentIDMap.put(comment.getCommentId(), comment)))
+                    .doOnSuccess(list -> slab = Math.max(slab, slabId + 1))
+                    .doOnSuccess(list -> size += list.size())
+                    .doOnSuccess(list -> isFurtherLoadingPossible = (list.size() == 10))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .toObservable()
+                    .cacheWithInitialCapacity(1)
+                    .toSingle();
         }
 
         public synchronized void clear() {
@@ -192,10 +218,11 @@ public class CommentRepositoryImpl implements CommentRepository {
             this.isFurtherLoadingPossible = true;
             this.question = CommentRepositoryImpl.this
                     .questionRepository
-                    .getQuestionWithID(questionID)
-                    .toBlocking()
-                    .first();
-            this.userComment = dataRetriever.getUserAddedComment(questionID, userID).first().cache();
+                    .getQuestionWithID(questionID);
+            this.userComment = dataRetriever.getUserAddedComment(questionID, userID)
+                    .toObservable()
+                    .cacheWithInitialCapacity(1)
+                    .toSingle();
         }
         synchronized SortOrder getSortOrder() {
             return this.sortOrder;
@@ -204,10 +231,10 @@ public class CommentRepositoryImpl implements CommentRepository {
             return this.sortBy;
         }
 
-        synchronized Observable<Comment> kthComment(final int rank) {
+        synchronized Single<Comment> kthComment(final int rank) {
             final int mapIndex = rank/10;
             final int localIndex = rank%10;
-            final Observable<List<Comment>> commentObservable = getComments(mapIndex);
+            final Single<List<Comment>> commentObservable = getComments(mapIndex);
             commentRankMap.putIfAbsent(mapIndex, commentObservable);
             return commentRankMap.get(mapIndex).map(list -> list.size() > 0 ? list.get(localIndex) : null);
         }
@@ -219,9 +246,9 @@ public class CommentRepositoryImpl implements CommentRepository {
             }
             Log.e("CommentRepo", "inside the ensure");
             int currentSlabId = this.slab;
-            final Observable<List<Comment>> questionObservable = getComments(currentSlabId);
+            final Single<List<Comment>> questionObservable = getComments(currentSlabId);
             commentRankMap.putIfAbsent(currentSlabId, questionObservable);
-            commentRankMap.get(currentSlabId).subscribe(a -> {}, e -> {}, onCompleted);
+            commentRankMap.get(currentSlabId).subscribe(a -> onCompleted.call(), e -> {});
         }
 
         synchronized Optional<Comment> getComment(final int id) {
@@ -232,12 +259,17 @@ public class CommentRepositoryImpl implements CommentRepository {
             commentIDMap.put(comment.getCommentId(), comment);
         }
 
-        public Observable<Comment> userAddedComment() {
+        public Single<Comment> userAddedComment() {
             return userComment;
         }
 
         public void updateCommentText(int commentID, String text) {
-            this.userComment.toBlocking().first().setText(text);
+            this.userComment.toBlocking().value().setText(text);
+        }
+
+        synchronized Single<Comment> newUserComment(CommentAdditionRequest commentAdditionRequest) {
+            this.userComment = dataUpdater.newUserComment(commentAdditionRequest);
+            return this.userComment;
         }
 
     }

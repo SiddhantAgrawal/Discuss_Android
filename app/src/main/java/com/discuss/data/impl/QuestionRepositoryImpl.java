@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
+import rx.Single;
+import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -39,7 +41,7 @@ public class QuestionRepositoryImpl implements QuestionRepository {
 
     private final class State {
         private volatile int slab;
-        private Map<Integer, Observable<List<Question>>> questionRankMap;
+        private Map<Integer, Single<List<Question>>> questionRankMap;
         private volatile SortBy sortBy;
         private volatile SortOrder sortOrder;
         private Map<Integer, Question> questionIDMap;
@@ -52,33 +54,31 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             this.slab = 0;
         }
 
-        Observable<List<Question>> getQuestions(int slabId) {
-            return Observable.create(new Observable.OnSubscribe<List<Question>>() {
-                @Override
-                public void call(Subscriber<? super List<Question>> subscriber) {
-                    dataRetriever.getQuestions(slabId*10, 10, userID, sortBy.name(), sortOrder.name())
-                            .subscribe(subscriber);
-                }
-            }).doOnNext(list -> list.forEach(question -> questionIDMap.put(question.getQuestionId(), question)))
-                    .doOnNext(list -> slab = Math.max(slab, slabId + 1))
+        Single<List<Question>> getQuestions(int slabId) {
+            return Single.create((Single.OnSubscribe<List<Question>>) subscriber -> dataRetriever.getQuestions(slabId*10, 10, userID, sortBy.name(), sortOrder.name())
+                    .subscribe(subscriber))
+                    .doOnSuccess(list -> list.forEach(question -> questionIDMap.put(question.getQuestionId(), question)))
+                    .doOnSuccess(list -> slab = Math.max(slab, slabId + 1))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .cache();
+                    .toObservable()
+                    .cacheWithInitialCapacity(1)
+                    .toSingle();
         }
 
-        synchronized Observable<Question> kthQuestion(final int rank) {
+        synchronized Single<Question> kthQuestion(final int rank) {
             final int mapIndex = rank/10;
             final int localIndex = rank%10;
-            final Observable<List<Question>> questionObservable = getQuestions(mapIndex);
+            final Single<List<Question>> questionObservable = getQuestions(mapIndex);
             questionRankMap.putIfAbsent(mapIndex, questionObservable);
             return questionRankMap.get(mapIndex).map(list -> list.get(localIndex));
         }
 
         synchronized void ensureMoreQuestions(Action0 onCompleted) {
             int currentSlabId = this.slab;
-            final Observable<List<Question>> questionObservable = getQuestions(currentSlabId);
+            final Single<List<Question>> questionObservable = getQuestions(currentSlabId);
             questionRankMap.putIfAbsent(currentSlabId, questionObservable);
-            questionRankMap.get(currentSlabId).subscribe(a -> {}, e -> {}, onCompleted);
+            questionRankMap.get(currentSlabId).subscribe(a -> onCompleted.call(), e -> {});
         }
 
         public synchronized void clear() {
@@ -86,7 +86,7 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             this.sortOrder = null;
             this.questionRankMap = new ConcurrentHashMap<>();
             this.slab = 0;
-            //stateDiff.flushAll();
+            stateDiff.flushAll();
         }
 
         synchronized void updateType(SortOrder sortOrder, SortBy sortBy) {
@@ -94,7 +94,6 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             this.sortBy = sortBy;
             this.sortOrder = sortOrder;
             this.questionRankMap = new ConcurrentHashMap<>();
-            //stateDiff.flushAll();
         }
 
         synchronized SortOrder getSortOrder() {
@@ -125,27 +124,27 @@ public class QuestionRepositoryImpl implements QuestionRepository {
 
 
     @Override
-    public synchronized Observable<Question> kthQuestion(final int kth, SortBy sortBy, SortOrder sortOrder) {
+    public synchronized Single<Question> kthQuestion(final int kth, SortBy sortBy, SortOrder sortOrder) {
 
         if (!(this.state.getSortOrder() == sortOrder && this.state.getSortBy() == sortBy)) {
+            stateDiff.flushAll();
             this.state.updateType(sortOrder, sortBy);
         }
         return this.state.kthQuestion(kth);
     }
 
     @Override
-    public Observable<Question> getQuestionWithID(int questionID) {
+    public Single<Question> getQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
         Log.e("getQuestion", "questionId" + question + " " + "question" + question.get().isLiked());
-        return question.map(Observable::just)
+        return question.map(Single::just)
                 .orElseGet(() -> dataRetriever.getQuestion(questionID, userID)
-                        .doOnNext(this.state::putInCachedQuestions)
-                        .cache());
+                        .doOnSuccess(this.state::putInCachedQuestions).toObservable().cacheWithInitialCapacity(1).toSingle());
 
     }
 
     @Override
-    public Observable<Boolean> likeQuestionWithID(int questionID) {
+    public Single<Boolean> likeQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
         if (question.isPresent()) {
             Question question1 = question.get();
@@ -153,11 +152,11 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             question1.incrementLikes();
         }
         stateDiff.likeQuestion(questionID);
-        return Observable.just(true);
+        return Single.just(true);
     }
 
     @Override
-    public Observable<Boolean> unlikeQuestionWithID(int questionID) {
+    public Single<Boolean> unlikeQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
         if (question.isPresent()) {
             Question question1 = question.get();
@@ -166,29 +165,29 @@ public class QuestionRepositoryImpl implements QuestionRepository {
         }
         Log.e("Unliked question", "" + this.state.getQuestion(questionID).get().isLiked());
         stateDiff.undoLikeForQuestion(questionID);
-        return Observable.just(true);
+        return Single.just(true);
     }
 
     @Override
-    public Observable<Boolean> bookmarkQuestionWithID(int questionID) {
+    public Single<Boolean> bookmarkQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
         if (question.isPresent()) {
             Question question1 = question.get();
             question1.setBookmarked(false);
         }
         stateDiff.bookmarkQuestion(questionID);
-        return Observable.just(true);
+        return Single.just(true);
     }
 
     @Override
-    public Observable<Boolean> unbookmarkQuestionWithID(int questionID) {
+    public Single<Boolean> unbookmarkQuestionWithID(int questionID) {
         Optional<Question> question = this.state.getQuestion(questionID);
         if (question.isPresent()) {
             Question question1 = question.get();
             question1.setBookmarked(false);
         }
         stateDiff.undoBookmarkForQuestion(questionID);
-        return Observable.just(true);
+        return Single.just(true);
     }
 
     public int estimatedSize() {
@@ -197,8 +196,10 @@ public class QuestionRepositoryImpl implements QuestionRepository {
 
     @Override
     public void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder) {
-        this.state.updateType(sortOrder, sortBy);
-        ensureKMoreQuestions(onCompleted);
+        this.stateDiff.flushAll().subscribe(a -> {
+            this.state.updateType(sortOrder, sortBy);
+            ensureKMoreQuestions(onCompleted);
+        });
     }
 
     @Override

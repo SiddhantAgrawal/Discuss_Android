@@ -9,6 +9,7 @@ import com.discuss.utils.Utils;
 import javax.inject.Inject;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Func1;
 
 /**
@@ -18,7 +19,7 @@ import rx.functions.Func1;
 public class UserCommentPresenterImpl implements UserCommentPresenter {
     private int questionID;
     private CommentRepository commentRepository;
-    private Observable<Comment> comment;
+    private Single<Comment> comment;
     private volatile String editedComment;
     private volatile String initialComment;
 
@@ -30,12 +31,11 @@ public class UserCommentPresenterImpl implements UserCommentPresenter {
     public Observable<CommentSummary> init(int questionID) {
         this.questionID = questionID;
         this.comment = commentRepository.userAddedComment(questionID);
-        return comment.map(commentCommentSummaryFunc1).doOnNext(commentSummary -> {
+        return comment.map(commentCommentSummaryFunc1).doOnSuccess(commentSummary -> {
             if (commentSummary != null) {
                 editedComment = initialComment = commentSummary.getText();
-
             }
-        });
+        }).toObservable();
     }
 
     public void setEditedComment(final String editedComment) {
@@ -47,11 +47,13 @@ public class UserCommentPresenterImpl implements UserCommentPresenter {
     }
 
     @Override
-    public void saveEditedComment() {
-        int commentID = comment.toBlocking().first().getCommentId();
+    public void save() {
+        int commentID = comment.toBlocking().value().getCommentId();
         if(!Utils.isEqual(initialComment, editedComment)) {
             commentRepository.updateCommentText(commentID, editedComment);
         }
+        commentRepository.save();
+        this.comment = commentRepository.userAddedComment(questionID);
     }
 
 

@@ -1,9 +1,12 @@
 package com.discuss.data;
 
 
+import android.util.Pair;
+
 import com.discuss.datatypes.Comment;
 
 import rx.Observable;
+import rx.Single;
 import rx.functions.Action0;
 
 /**
@@ -75,13 +78,13 @@ public interface StateDiff {
 
     void updateCommentText(int commendID, final String comment);
 
-    void flushLikeStateDiffForQuestions();
+    Observable<Pair<Integer,Boolean>> flushLikeStateDiffForQuestions();
 
-    void flushLikeStateDiffForComments();
+    Observable<Pair<Integer,Boolean>> flushLikeStateDiffForComments();
 
-    void flushBookmarkedStateDiffForQuestions();
+    Observable<Pair<Integer,Boolean>> flushBookmarkedStateDiffForQuestions();
 
-    void flushAll();
+    Single<Boolean> flushAll();
 
 
 
