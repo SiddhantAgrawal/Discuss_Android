@@ -48,6 +48,7 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
     @Override
     public void init(Action0 onCompletedAction, int questionID) {
         this.questionID = questionID;
+        questionRepository.init(() -> {}, this.sortBy, this.sortOrder);
         commentRepository.init(onCompletedAction, sortBy, sortOrder, questionID);
     }
 
@@ -108,9 +109,15 @@ public class QuestionViewPresenterImpl implements QuestionViewPresenter {
                         .bookmarked(question.isBookmarked())
                         .personId(question.getPersonId())
                         .personName(question.getPersonName())
+                        .answered(question.isAnswered())
                         .build();
             }
         });
+    }
+
+    @Override
+    public int questionId() {
+        return questionID;
     }
 
     @Override

@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
+import com.discuss.DiscussApplication;
 import com.discuss.ui.CommentSummary;
 import com.example.siddhantagrawal.check_discuss.R;
 
@@ -32,6 +33,7 @@ public class UserComment extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DiscussApplication) getApplication()).getMainComponent().inject(this);
         setContentView(R.layout.user_comment);
         ProgressDialog mProgressDialog = new ProgressDialog(UserComment.this);
         mProgressDialog.setTitle("view comment");
@@ -43,6 +45,7 @@ public class UserComment extends Activity {
         ViewSwitcher simpleViewSwitcher = (ViewSwitcher) findViewById(R.id.user_comment_comment_view_switch);
         Button button = (Button) findViewById(R.id.user_comment_edit_button);
         final EditText editText = (EditText) findViewById(R.id.user_comment_comment_edit_view);
+        final TextView textView = (TextView) findViewById(R.id.user_comment_comment_text_view);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,6 +55,7 @@ public class UserComment extends Activity {
                     simpleViewSwitcher.showNext();
                     viewMode = !viewMode;
                 } else {
+                    textView.setText(editText.getText().toString());
                     button.setText("Edit your Comment");
                     userCommentPresenter.setEditedComment(editText.getText().toString());
                     simpleViewSwitcher.showPrevious();

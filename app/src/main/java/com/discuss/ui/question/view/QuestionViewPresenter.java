@@ -29,6 +29,8 @@ public interface QuestionViewPresenter extends QuestionPresenter, CommentPresent
 
     Single<QuestionSummary> getQuestion();
 
+    int questionId();
+
     void save();
 
 }

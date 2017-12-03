@@ -1,6 +1,7 @@
 package com.discuss.data.impl;
 
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 import android.util.Pair;
 
 import com.discuss.data.DataUpdater;
@@ -142,6 +143,7 @@ public class StateImpl implements StateDiff {
 
     @Override
     public Single<Boolean> flushAll() {
+        Log.e("StateImpl", "inside flush");
         return Observable.merge(flushBookmarkedStateDiffForQuestions(), flushLikeStateDiffForComments(), flushLikeStateDiffForQuestions())
                 .count()
                 .map(a -> a >= 0)

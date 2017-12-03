@@ -85,6 +85,9 @@ public class QuestionView extends Activity {
     @Override
     public void onRestart() {
         super.onRestart();
+        Log.e("QQVV", "inside restart");
+        questionViewPresenter.init(() -> {adapter.notifyDataSetChanged();}, questionViewPresenter.questionId());
+
     }
 
     @Override
@@ -175,6 +178,7 @@ public class QuestionView extends Activity {
 
                         Button button = (Button) itemView.findViewById(R.id.question_complete_user_comment);
                         if (questionSummary.isAnswered()) {
+                            Log.e("QVVVV", "question is answered");
                             button.setText("View your Answer");
                             button.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -185,6 +189,7 @@ public class QuestionView extends Activity {
                                 }
                             });
                         } else {
+                            Log.e("QVVVV", "question not answered");
                             button.setText("Submit your Answer");
                             button.setOnClickListener(new View.OnClickListener() {
                                 @Override

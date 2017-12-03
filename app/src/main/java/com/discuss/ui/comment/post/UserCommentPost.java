@@ -44,7 +44,6 @@ public class UserCommentPost extends AppCompatActivity {
         addComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (imageToUpload != null)
                     Toast.makeText(UserCommentPost.this, "your comment has been added successfully : ", Toast.LENGTH_LONG).show();
             }
         });

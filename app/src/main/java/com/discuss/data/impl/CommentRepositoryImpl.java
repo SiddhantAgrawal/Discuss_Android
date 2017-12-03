@@ -105,13 +105,14 @@ public class CommentRepositoryImpl implements CommentRepository {
     public Single<Comment> userAddedComment(final int questionID) {
         Observable<Comment> alternative = this.stateDiff.flushAll()
                 .doOnSuccess((b) -> this.state.updateType(this.state.sortOrder, this.state.sortBy, questionID))
-                .flatMap(aBoolean -> state.userAddedComment()).toObservable();
+                .flatMap(aBoolean -> state.userAddedComment()).toObservable().cache();
 
         return Observable.just(this.state)
                 .flatMap(state -> state.question.map(q -> new Pair<State, Question>(state, q)).toObservable())
                 .filter(p -> p.second.getQuestionId() == questionID)
                 .flatMap(p -> p.first.userAddedComment().toObservable())
                 .switchIfEmpty(alternative)
+                .cache()
                 .toSingle();
     }
 
@@ -132,6 +133,7 @@ public class CommentRepositoryImpl implements CommentRepository {
 
     @Override
     public Single<Boolean> save() {
+        Log.e("CommentRepoImpl", "inside save");
         return this.stateDiff.flushAll();
     }
 
