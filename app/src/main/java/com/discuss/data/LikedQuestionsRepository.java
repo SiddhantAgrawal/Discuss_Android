@@ -29,4 +29,6 @@ public interface LikedQuestionsRepository {
     int estimatedSize();
 
     void init(Action0 onCompleted);
+
+    Single<Boolean> save();
 }

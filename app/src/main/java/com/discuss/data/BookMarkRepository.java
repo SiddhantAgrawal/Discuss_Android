@@ -29,4 +29,5 @@ public interface BookMarkRepository {
 
     void init(Action0 onCompleted);
 
+    Single<Boolean> save();
 }

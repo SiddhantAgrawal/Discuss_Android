@@ -47,6 +47,8 @@ import com.example.siddhantagrawal.check_discuss.R;
 
 import javax.inject.Inject;
 
+import rx.functions.Action1;
+
 /**
  * @author siddhant.agrawal
  * @author Deepak Thakur
@@ -241,55 +243,59 @@ public class MainActivity extends AppCompatActivity {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             View itemView = inflater.inflate(R.layout.question_short, parent, false);
-            final QuestionSummary questionSummary = mainFeedPresenter.get(position).toBlocking().value();
+            mainFeedPresenter.get(position).subscribe(new Action1<QuestionSummary>() {
+                @Override
+                public void call(QuestionSummary questionSummary) {
+                    UIUtil.setTextView(itemView, R.id.question_short_question, questionSummary.getText());
+                    UIUtil.setTextView(itemView, R.id.question_short_like_value, Integer.toString(questionSummary.getLikes()));
+                    UIUtil.setTextView(itemView, R.id.question_short_difficulty_value, questionSummary.getDifficulty());
+                    UIUtil.setTextView(itemView, R.id.question_short_view_value, Integer.toString(questionSummary.getViews()));
+                    UIUtil.setImageView(context, itemView, R.id.question_short_image, questionSummary.getImageUrl());
 
-            UIUtil.setTextView(itemView, R.id.question_short_question, questionSummary.getText());
-            UIUtil.setTextView(itemView, R.id.question_short_like_value, Integer.toString(questionSummary.getLikes()));
-            UIUtil.setTextView(itemView, R.id.question_short_difficulty_value, questionSummary.getDifficulty());
-            UIUtil.setTextView(itemView, R.id.question_short_view_value, Integer.toString(questionSummary.getViews()));
-            UIUtil.setImageView(context, itemView, R.id.question_short_image, questionSummary.getImageUrl());
+                    ImageView likeImage = itemView.findViewById(R.id.question_short_like);
+                    TextView textView = itemView.findViewById(R.id.question_short_like_value);
 
-            ImageView likeImage = itemView.findViewById(R.id.question_short_like);
-            TextView textView = itemView.findViewById(R.id.question_short_like_value);
+                    final LikeState likeState = new QuestionLikeState(questionSummary.getQuestionId(),
+                            questionSummary.getLikes(),
+                            questionSummary.isLiked(),
+                            likeImage,
+                            textView,
+                            ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.like_icon),
+                            ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.liked),
+                            mainFeedPresenter);
 
-            final LikeState likeState = new QuestionLikeState(questionSummary.getQuestionId(),
-                    questionSummary.getLikes(),
-                    questionSummary.isLiked(),
-                    likeImage,
-                    textView,
-                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.like_icon),
-                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.liked),
-                    mainFeedPresenter);
+                    likeImage.setOnTouchListener((view, motionEvent) -> {
+                        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                            likeState.pressUpdate();
+                        }
+                        return true;
+                    });
 
-            likeImage.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    likeState.pressUpdate();
+                    ImageView bookmarkImage = itemView.findViewById(R.id.question_short_bookmark);
+
+                    final BookMarkState bookMarkState = new BookMarkState(questionSummary.getQuestionId(),
+                            questionSummary.isBookmarked(),
+                            bookmarkImage,
+                            ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.bookmark),
+                            ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.bookmark),
+                            mainFeedPresenter);
+
+                    bookmarkImage.setOnTouchListener((view, motionEvent) -> {
+                        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                            bookMarkState.pressUpdate();
+                        }
+                        return true;
+                    });
+
+
+                    itemView.setOnClickListener(arg0 -> {
+                        Intent intent = new Intent(context, QuestionView.class);
+                        intent.putExtra("questionId", questionSummary.getQuestionId());
+                        context.startActivity(intent);
+                    });
                 }
-                return true;
             });
 
-            ImageView bookmarkImage = itemView.findViewById(R.id.question_short_bookmark);
-
-            final BookMarkState bookMarkState = new BookMarkState(questionSummary.getQuestionId(),
-                    questionSummary.isBookmarked(),
-                    bookmarkImage,
-                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.bookmark),
-                    ContextCompat.getDrawable(MainActivity.QuestionViewAdapter.this.context, R.drawable.bookmark),
-                    mainFeedPresenter);
-
-            bookmarkImage.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    bookMarkState.pressUpdate();
-                }
-                return true;
-            });
-
-
-            itemView.setOnClickListener(arg0 -> {
-                Intent intent = new Intent(context, QuestionView.class);
-                intent.putExtra("questionId", questionSummary.getQuestionId());
-                context.startActivity(intent);
-            });
             return itemView;
         }
     }

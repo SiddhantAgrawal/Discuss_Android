@@ -52,6 +52,7 @@ public class QuestionView extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("QuestionView", "inside onCreate");
         ((DiscussApplication) getApplication()).getMainComponent().inject(this);
         setContentView(R.layout.question);
         mProgressDialog = new ProgressDialog(QuestionView.this);
@@ -64,14 +65,12 @@ public class QuestionView extends Activity {
         questionViewPresenter.init(new Action0() {
             @Override
             public void call() {
-                Log.e("QuestionView", "on completed of question presenter");
                 ListView listview = (ListView) findViewById(R.id.question_view);
                 adapter = new CommentViewAdapter(QuestionView.this, questionViewPresenter);
                 listview.setAdapter(adapter);
                 listview.setOnScrollListener(new EndlessScrollListener(new Command() {
                     @Override
                     public void execute() {
-                        Log.e("QuestionView", "in execute");
                         questionViewPresenter.update(() -> adapter.notifyDataSetChanged(), () -> {});
                     }
                 }, 4));
@@ -83,10 +82,10 @@ public class QuestionView extends Activity {
     }
 
     @Override
-    public void onRestart() {
-        super.onRestart();
-        Log.e("QQVV", "inside restart");
-        questionViewPresenter.init(() -> {adapter.notifyDataSetChanged();}, questionViewPresenter.questionId());
+    public void onStart() {
+        super.onStart();
+        Log.e("QuestionView", "inside onStart");
+        //questionViewPresenter.init(() -> {adapter.notifyDataSetChanged();}, questionViewPresenter.questionId());
 
     }
 
@@ -94,7 +93,6 @@ public class QuestionView extends Activity {
     public void onStop() {
         super.onStop();
         questionViewPresenter.save();
-
     }
 
     private class CommentViewAdapter extends BaseAdapter {
@@ -109,7 +107,6 @@ public class QuestionView extends Activity {
 
         @Override
         public int getCount() {
-            Log.e("QuesV", "count is " + questionViewPresenter.size() + 1);
             return questionViewPresenter.size() + 1;
         }
 
@@ -133,7 +130,6 @@ public class QuestionView extends Activity {
                 questionViewPresenter.getQuestion().subscribe(new Action1<QuestionSummary>() {
                     @Override
                     public void call(QuestionSummary questionSummary) {
-                        Log.e("QUestionViewss", questionSummary.isLiked() + " ");
                         UIUtil.setTextView(itemView, R.id.question_complete_question, questionSummary.getText());
                         UIUtil.setTextView(itemView, R.id.question_complete_like_value, Integer.toString(questionSummary.getLikes()));
                         UIUtil.setTextView(itemView, R.id.question_complete_asked_by_value, questionSummary.getPersonName());
@@ -178,7 +174,6 @@ public class QuestionView extends Activity {
 
                         Button button = (Button) itemView.findViewById(R.id.question_complete_user_comment);
                         if (questionSummary.isAnswered()) {
-                            Log.e("QVVVV", "question is answered");
                             button.setText("View your Answer");
                             button.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -189,7 +184,6 @@ public class QuestionView extends Activity {
                                 }
                             });
                         } else {
-                            Log.e("QVVVV", "question not answered");
                             button.setText("Submit your Answer");
                             button.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -211,7 +205,6 @@ public class QuestionView extends Activity {
         }
 
         private View getCommentView(final int position, ViewGroup parent) {
-            Log.e("QQQQQQQQ", position + "");
             try {
                 LayoutInflater inflater = (LayoutInflater) context
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

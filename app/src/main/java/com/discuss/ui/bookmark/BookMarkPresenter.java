@@ -25,4 +25,5 @@ public interface BookMarkPresenter extends QuestionPresenter {
     Observable<Boolean> refresh();
     Single<QuestionSummary> get(int position);
     int size();
+    void save();
 }

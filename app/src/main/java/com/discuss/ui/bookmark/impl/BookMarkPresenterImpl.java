@@ -74,6 +74,11 @@ public class BookMarkPresenterImpl implements BookMarkPresenter {
     }
 
     @Override
+    public void save() {
+        this.bookMarkRepository.save();
+    }
+
+    @Override
     public Single<Boolean> likeQuestionWithID(int questionID) {
         return bookMarkRepository.likeQuestionWithID(questionID);
     }

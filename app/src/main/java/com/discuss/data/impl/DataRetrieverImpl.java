@@ -1,6 +1,8 @@
 package com.discuss.data.impl;
 
 
+import android.util.Log;
+
 import com.discuss.data.DiscussService;
 import com.discuss.datatypes.Category;
 import com.discuss.datatypes.Comment;

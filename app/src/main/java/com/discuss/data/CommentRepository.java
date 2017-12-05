@@ -27,7 +27,7 @@ public interface CommentRepository {
     Single<Comment> newUserComment(final CommentAdditionRequest comment);
     int estimatedSize();
 
-    void updateCommentText(int commentID, String text);
+    Single<Comment> updateCommentText(int commentID, String text);
     boolean isFurtherLoadingPossible();
     void ensureKMoreComments(Action0 onCompleted, Action0 onNoUpdate);
     void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID);

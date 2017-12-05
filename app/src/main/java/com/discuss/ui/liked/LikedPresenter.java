@@ -29,4 +29,6 @@ public interface LikedPresenter extends QuestionPresenter {
     Single<QuestionSummary> get(int position);
 
     int size();
+
+    void save();
 }

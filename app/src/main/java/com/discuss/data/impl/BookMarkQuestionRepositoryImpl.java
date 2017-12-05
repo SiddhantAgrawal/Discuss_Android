@@ -13,9 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
 import rx.Single;
+import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -39,12 +42,15 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
         }
 
         Single<List<Question>> getQuestions(int slabId) {
-            return Observable.create((Observable.OnSubscribe<List<Question>>) subscriber -> dataRetriever.getBookMarkedQuestions(slabId*10, 10, userID)
-                    .subscribe(subscriber)).doOnNext(list -> list.forEach(question -> questionIDMap.put(question.getQuestionId(), question)))
-                    .doOnNext(list -> slab = Math.max(slab, slabId + 1))
+            return Single.create((Single.OnSubscribe<List<Question>>) subscriber -> dataRetriever.getBookMarkedQuestions(slabId*10, 10, userID)
+                    .subscribe(subscriber))
+                    .doOnSuccess(list -> list.forEach(question -> questionIDMap.put(question.getQuestionId(), question)))
+                    .doOnSuccess(list -> slab = Math.max(slab, slabId + 1))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .cache().toSingle();
+                    .toObservable()
+                    .cacheWithInitialCapacity(1)
+                    .toSingle();
         }
 
         synchronized Single<Question> kthQuestion(final int rank) {
@@ -59,13 +65,13 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
             int currentSlabId = this.slab;
             final Single<List<Question>> questionObservable = getQuestions(currentSlabId);
             questionRankMap.putIfAbsent(currentSlabId, questionObservable);
-            questionRankMap.get(currentSlabId).doOnSuccess(a -> onCompleted.call());
+            questionRankMap.get(currentSlabId).subscribe(a -> onCompleted.call(), e -> {});
         }
 
         public synchronized void clear() {
             this.questionRankMap = new ConcurrentHashMap<>();
             this.slab = 0;
-            //stateDiff.flushAll();
+            stateDiff.flushAll();
         }
 
         synchronized void updateType() {
@@ -104,6 +110,7 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
         return question.map(Single::just)
                 .orElseGet(() -> dataRetriever.kthBookMarkedQuestion(questionID, userID)
                         .doOnSuccess(this.state::putInCachedQuestions).toObservable().cacheWithInitialCapacity(1).toSingle());
+
     }
 
     @Override
@@ -112,6 +119,7 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
         if (question.isPresent()) {
             Question question1 = question.get();
             question1.setLiked(true);
+            question1.incrementLikes();
         }
         stateDiff.likeQuestion(questionID);
         return Single.just(true);
@@ -123,6 +131,7 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
         if (question.isPresent()) {
             Question question1 = question.get();
             question1.setLiked(false);
+            question1.decrementLikes();
         }
         stateDiff.undoLikeForQuestion(questionID);
         return Single.just(true);
@@ -156,8 +165,15 @@ public class BookMarkQuestionRepositoryImpl implements BookMarkRepository {
 
     @Override
     public void init(Action0 onCompleted) {
-        this.state.updateType();
-        ensureKMoreQuestions(onCompleted);
+        this.stateDiff.flushAll().subscribe(a -> {
+            this.state.updateType();
+            ensureKMoreQuestions(onCompleted);
+        });
+    }
+
+    @Override
+    public Single<Boolean> save() {
+        return this.stateDiff.flushAll();
     }
 
     @Override

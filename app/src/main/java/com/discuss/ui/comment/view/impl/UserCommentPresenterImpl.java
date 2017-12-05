@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.Single;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -48,28 +49,31 @@ public class UserCommentPresenterImpl implements UserCommentPresenter {
     }
 
     public void setEditedComment(final String editedComment) {
-        Log.e("UCPI","set edit msg " + editedComment);
         this.editedComment = editedComment;
     }
 
     public String getEditedComment() {
-        Log.e("UCPI","get edit msg " + editedComment);
         return editedComment;
     }
 
     @Override
     public void save() {
-        int commentID = comment.subscribeOn(Schedulers.io())
+        comment.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .toBlocking()
-                .value()
-                .getCommentId();
-        if(!Utils.isEqual(initialComment, editedComment)) {
-            commentRepository.updateCommentText(commentID, editedComment);
-        }
-        commentRepository.save();
-        this.comment = commentRepository.userAddedComment(questionID);
-        Log.e("UserCommentPreImpl", "after save");
+                .map(Comment::getCommentId).subscribe(commentID -> {
+                    if(!Utils.isEqual(initialComment, editedComment)) {
+                        commentRepository.updateCommentText(commentID, editedComment).subscribe(new Action1<Comment>() {
+                            @Override
+                            public void call(Comment comment) {
+                                commentRepository.save();
+                                UserCommentPresenterImpl.this.comment = commentRepository.userAddedComment(questionID);
+                            }
+                        });
+                    } else {
+                        commentRepository.save();
+                        UserCommentPresenterImpl.this.comment = commentRepository.userAddedComment(questionID);
+                    }
+                });
     }
 
 

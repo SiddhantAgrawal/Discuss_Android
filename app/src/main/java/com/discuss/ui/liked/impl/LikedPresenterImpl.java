@@ -65,6 +65,11 @@ public class LikedPresenterImpl implements LikedPresenter {
         return likedQuestionsRepository.estimatedSize();
     }
 
+    @Override
+    public void save() {
+        this.likedQuestionsRepository.save();
+    }
+
 
     @Override
     public Single<Boolean> likeQuestionWithID(int questionID) {

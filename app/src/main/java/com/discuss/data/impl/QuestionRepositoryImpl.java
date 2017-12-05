@@ -21,6 +21,8 @@ import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -127,10 +129,22 @@ public class QuestionRepositoryImpl implements QuestionRepository {
     public synchronized Single<Question> kthQuestion(final int kth, SortBy sortBy, SortOrder sortOrder) {
 
         if (!(this.state.getSortOrder() == sortOrder && this.state.getSortBy() == sortBy)) {
-            stateDiff.flushAll();
-            this.state.updateType(sortOrder, sortBy);
+            return stateDiff.flushAll().doOnSuccess(new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    QuestionRepositoryImpl.this.state.updateType(sortOrder, sortBy);
+                }
+            }).flatMap(new Func1<Boolean, Single<? extends Question>>() {
+
+                @Override
+                public Single<? extends Question> call(Boolean aBoolean) {
+                    return null;
+                }
+            });
+
+        } else {
+            return this.state.kthQuestion(kth);
         }
-        return this.state.kthQuestion(kth);
     }
 
     @Override

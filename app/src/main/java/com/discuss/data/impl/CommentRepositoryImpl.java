@@ -24,6 +24,7 @@ import rx.Single;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -105,27 +106,32 @@ public class CommentRepositoryImpl implements CommentRepository {
     public Single<Comment> userAddedComment(final int questionID) {
         Observable<Comment> alternative = this.stateDiff.flushAll()
                 .doOnSuccess((b) -> this.state.updateType(this.state.sortOrder, this.state.sortBy, questionID))
-                .flatMap(aBoolean -> state.userAddedComment()).toObservable().cache();
+                .flatMap(aBoolean -> state.userAddedComment())
+                .toObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .cache();
 
         return Observable.just(this.state)
                 .flatMap(state -> state.question.map(q -> new Pair<State, Question>(state, q)).toObservable())
                 .filter(p -> p.second.getQuestionId() == questionID)
-                .flatMap(p -> p.first.userAddedComment().toObservable())
+                .flatMap(p -> p.first.userAddedComment().toObservable().subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()))
                 .switchIfEmpty(alternative)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .cache()
                 .toSingle();
     }
 
     @Override
     public Single<Comment> newUserComment(CommentAdditionRequest comment) {
-        this.stateDiff.flushAll();
-        return this.state.newUserComment(comment);
+        return this.stateDiff.flushAll().flatMap(aBoolean -> CommentRepositoryImpl.this.state.newUserComment(comment));
     }
 
     @Override
     public void init(Action0 onCompleted, SortBy sortBy, SortOrder sortOrder, int questionID) {
         this.stateDiff.flushAll().subscribe(a -> {
-            Log.e("commentRepo", "inside init");
             this.state.updateType(sortOrder, sortBy, questionID);
             ensureKMoreComments(onCompleted, () -> {});
         });
@@ -133,7 +139,6 @@ public class CommentRepositoryImpl implements CommentRepository {
 
     @Override
     public Single<Boolean> save() {
-        Log.e("CommentRepoImpl", "inside save");
         return this.stateDiff.flushAll();
     }
 
@@ -149,9 +154,13 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public void updateCommentText(int commentID, String text) {
-        this.state.updateCommentText(commentID, text);
-        this.stateDiff.updateCommentText(commentID, text);
+    public Single<Comment> updateCommentText(int commentID, String text) {
+        return this.state.updateCommentText(commentID, text).doOnSuccess(new Action1<Comment>() {
+            @Override
+            public void call(Comment comment) {
+                CommentRepositoryImpl.this.stateDiff.updateCommentText(commentID, text);
+            }
+        });
     }
 
     @Override
@@ -223,8 +232,10 @@ public class CommentRepositoryImpl implements CommentRepository {
                     .getQuestionWithID(questionID);
             this.userComment = dataRetriever.getUserAddedComment(questionID, userID)
                     .toObservable()
-                    .cacheWithInitialCapacity(1)
-                    .toSingle();
+                    .cache()
+                    .toSingle()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
         }
         synchronized SortOrder getSortOrder() {
             return this.sortOrder;
@@ -246,7 +257,6 @@ public class CommentRepositoryImpl implements CommentRepository {
                onNoUpdate.call();
                return;
             }
-            Log.e("CommentRepo", "inside the ensure");
             int currentSlabId = this.slab;
             final Single<List<Comment>> questionObservable = getComments(currentSlabId);
             commentRankMap.putIfAbsent(currentSlabId, questionObservable);
@@ -265,8 +275,8 @@ public class CommentRepositoryImpl implements CommentRepository {
             return userComment;
         }
 
-        public void updateCommentText(int commentID, String text) {
-            this.userComment.toBlocking().value().setText(text);
+        public Single<Comment> updateCommentText(int commentID, String text) {
+            return this.userComment.doOnSuccess(c -> c.setText(text));
         }
 
         synchronized Single<Comment> newUserComment(CommentAdditionRequest commentAdditionRequest) {

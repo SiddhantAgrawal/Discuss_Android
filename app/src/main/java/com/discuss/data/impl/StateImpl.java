@@ -143,7 +143,6 @@ public class StateImpl implements StateDiff {
 
     @Override
     public Single<Boolean> flushAll() {
-        Log.e("StateImpl", "inside flush");
         return Observable.merge(flushBookmarkedStateDiffForQuestions(), flushLikeStateDiffForComments(), flushLikeStateDiffForQuestions())
                 .count()
                 .map(a -> a >= 0)
@@ -165,7 +164,7 @@ public class StateImpl implements StateDiff {
                     entity.put(response.first, PRESENT); /* will retry next time */
                 }
             }
-        });
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
 
         Observable<Pair<K, Boolean>> observable2 = Observable.from(undoEntityCopy).
                 flatMap(undoEntityfunc2).doOnNext(new Action1<Pair<K, Boolean>>() {
@@ -175,7 +174,7 @@ public class StateImpl implements StateDiff {
                     undoEntity.put(response.first, PRESENT); /* will retry next time */
                 }
             }
-        });
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
 
         Observable<Pair<K, Boolean>> mergedObservable = Observable.merge(observable1, observable2);
         return mergedObservable.cache();
