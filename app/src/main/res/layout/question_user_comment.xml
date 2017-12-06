@@ -124,34 +124,8 @@
 
     <View
         android:layout_width="fill_parent"
-        android:layout_height="5dp">
+        android:layout_height="10dp">
     </View>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.8dp"
-        android:background="@android:color/darker_gray"/>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="5dp">
-    </View>
-
-    <TextView
-        android:id="@+id/question_user_comment_user_comment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="normal"
-        android:textSize="20sp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:text="@string/your_comment" />
-
-    <TextView
-        android:id="@+id/question_user_comment_comment_text_view"
-        android:text="abc"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content" />
 
 </LinearLayout>
 

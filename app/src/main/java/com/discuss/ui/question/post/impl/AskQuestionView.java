@@ -36,7 +36,7 @@ public class AskQuestionView extends AppCompatActivity {
     static final int GALARY_CAPTURE_IMAGE_REQUEST_CODE = 200;
 
     private volatile Bitmap imageToUpload;
-    Spinner dropdownSpinner;
+
     @Inject
     QuestionPostPresenter questionPostPresenter;
 
@@ -48,7 +48,7 @@ public class AskQuestionView extends AppCompatActivity {
         Button addImageButton = (Button) findViewById(R.id.ask_question_choose_image);
         questionPostPresenter.
                 getCategories().
-                doOnSuccess(categories -> {
+                subscribe(categories -> {
                     final Spinner categoryDropDown = (Spinner) findViewById(R.id.ask_question_tag_button);
                     categoryDropDown.setAdapter(new ArrayAdapter<Category>(AskQuestionView.this, android.R.layout.simple_list_item_1, categories));
                     addImageButton.setOnClickListener(new View.OnClickListener() {
@@ -60,8 +60,7 @@ public class AskQuestionView extends AppCompatActivity {
                     addQuestion.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (imageToUpload != null)
-                            Toast.makeText(AskQuestionView.this, "your question has been added successfully for the category : " + dropdownSpinner.getSelectedItem().toString(),
+                            Toast.makeText(AskQuestionView.this, "your question has been added successfully for the category : " + categoryDropDown.getSelectedItem().toString(),
                                     Toast.LENGTH_LONG).show();
                         }
                     });

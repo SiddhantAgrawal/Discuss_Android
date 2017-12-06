@@ -68,7 +68,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     // testCompile 'junit:junit:4.12'
     compile 'javax.annotation:javax.annotation-api:1.2'
-
     compileOnly "org.projectlombok:lombok:1.16.18"
+    compile 'com.google.guava:guava:23.5-android'
 
 }

@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import rx.functions.Action0;
+import rx.functions.Action1;
 
 public class CommentedQuestionFragment extends Fragment implements com.discuss.ui.View {
 
@@ -66,7 +67,7 @@ public class CommentedQuestionFragment extends Fragment implements com.discuss.u
         ((DiscussApplication) getActivity().getApplication()).getMainComponent().inject(this);
 
         View itemView = inflater.inflate(R.layout.fragment_added_comments, container, false);
-        ListView listView = (ListView) itemView.findViewById(R.id.fragment_liked_questions);
+        ListView listView = (ListView) itemView.findViewById(R.id.fragment_added_comments);
 
         adapter = new QuestionViewAdapter(getActivity(), commentedPresenter);
         listView.setAdapter(adapter);
@@ -107,55 +108,60 @@ public class CommentedQuestionFragment extends Fragment implements com.discuss.u
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             View itemView = inflater.inflate(R.layout.question_user_comment, parent, false);
-            final QuestionSummary questionSummary = commentedPresenter.get(position).toBlocking().value();
+            commentedPresenter.get(position).subscribe(new Action1<QuestionSummary>() {
+                @Override
+                public void call(QuestionSummary questionSummary) {
+                    UIUtil.setTextView(itemView, R.id.question_user_comment_question, questionSummary.getText());
+                    UIUtil.setTextView(itemView, R.id.question_user_comment_like_value, Integer.toString(questionSummary.getLikes()));
+                    UIUtil.setTextView(itemView, R.id.question_user_comment_difficulty_value, questionSummary.getDifficulty());
+                    UIUtil.setTextView(itemView, R.id.question_user_comment_view_value, Integer.toString(questionSummary.getViews()));
+                    UIUtil.setImageView(context, itemView, R.id.question_user_comment_image, questionSummary.getImageUrl());
 
-            UIUtil.setTextView(itemView, R.id.question_user_comment_question, questionSummary.getText());
-            UIUtil.setTextView(itemView, R.id.question_user_comment_like_value, Integer.toString(questionSummary.getLikes()));
-            UIUtil.setTextView(itemView, R.id.question_user_comment_difficulty_value, questionSummary.getDifficulty());
-            UIUtil.setTextView(itemView, R.id.question_user_comment_view_value, Integer.toString(questionSummary.getViews()));
-            UIUtil.setImageView(context, itemView, R.id.question_user_comment_image, questionSummary.getImageUrl());
+                    ImageView likeImage = itemView.findViewById(R.id.question_user_comment_like);
+                    TextView textView = itemView.findViewById(R.id.question_user_comment_like_value);
 
-            ImageView likeImage = itemView.findViewById(R.id.question_user_comment_like);
-            TextView textView = itemView.findViewById(R.id.question_user_comment_like_value);
+                    final LikeState likeState = new QuestionLikeState(questionSummary.getQuestionId(),
+                            questionSummary.getLikes(),
+                            questionSummary.isLiked(),
+                            likeImage,
+                            textView,
+                            ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.like_icon),
+                            ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.liked),
+                            commentedPresenter);
 
-            final LikeState likeState = new QuestionLikeState(questionSummary.getQuestionId(),
-                    questionSummary.getLikes(),
-                    questionSummary.isLiked(),
-                    likeImage,
-                    textView,
-                    ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.like_icon),
-                    ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.liked),
-                    commentedPresenter);
+                    likeImage.setOnTouchListener((view, motionEvent) -> {
+                        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                            likeState.pressUpdate();
+                        }
+                        return true;
+                    });
 
-            likeImage.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    likeState.pressUpdate();
+                    ImageView bookmarkImage = itemView.findViewById(R.id.question_user_comment_bookmark);
+
+                    final BookMarkState bookMarkState = new BookMarkState(questionSummary.getQuestionId(),
+                            questionSummary.isBookmarked(),
+                            bookmarkImage,
+                            ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.bookmark),
+                            ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.bookmark),
+                            commentedPresenter);
+
+                    bookmarkImage.setOnTouchListener((view, motionEvent) -> {
+                        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                            bookMarkState.pressUpdate();
+                        }
+                        return true;
+                    });
+
+
+                    itemView.setOnClickListener(arg0 -> {
+                        Intent intent = new Intent(context, QuestionView.class);
+                        intent.putExtra("questionId", questionSummary.getQuestionId());
+                        context.startActivity(intent);
+                    });
                 }
-                return true;
-            });
-
-            ImageView bookmarkImage = itemView.findViewById(R.id.question_user_comment_bookmark);
-
-            final BookMarkState bookMarkState = new BookMarkState(questionSummary.getQuestionId(),
-                    questionSummary.isBookmarked(),
-                    bookmarkImage,
-                    ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.bookmark),
-                    ContextCompat.getDrawable(QuestionViewAdapter.this.context, R.drawable.bookmark),
-                    commentedPresenter);
-
-            bookmarkImage.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    bookMarkState.pressUpdate();
-                }
-                return true;
             });
 
 
-            itemView.setOnClickListener(arg0 -> {
-                Intent intent = new Intent(context, QuestionView.class);
-                intent.putExtra("questionId", questionSummary.getQuestionId());
-                context.startActivity(intent);
-            });
             return itemView;
         }
     }
